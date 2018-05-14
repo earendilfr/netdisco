@@ -1,3 +1,56 @@
+2.039030 - 2018-05-09
+
+  [ENHANCEMENTS]
+
+  * bump SNMP::Info dependency
+
+2.039029 - 2018-05-09
+
+  [ENHANCEMENTS]
+
+  * #408 improvements to MakeRancidConf (earendilfr)
+  * #410 improvements to Undiscovered Neighbors report
+  * device port search will match on Description as well as Port
+  * issue DB schema statements each within savepoints
+
+  [BUG FIXES]
+
+  * #414 clicking discover button with empty field causes crash
+  * #415 neighbors map display is blank after upgrade
+
+2.039028 - 2018-05-05
+
+  [BUG FIXES]
+
+  * #413 manual retrigger of discovery does not work
+  * #411 store_modules: false is ignored
+
+2.039027 - 2018-04-28
+
+  [BUG FIXES]
+
+  * #405 Inventory reports default to all time to fix missing IPs
+
+2.039026 - 2018-04-28
+
+  [ENHANCEMENTS]
+
+  * #396 dump sshcollector stderr into null (B. De Wolf)
+  * #397 improve Palo Alto SSH Collector support (B. De Wolf)
+
+  [BUG FIXES]
+
+  * do not enqueue the same routed peer more than once
+  * #406 error in check_mac() params causing NBTStat failure
+
+2.039025 - 2018-04-27
+
+  [BUG FIXES]
+
+  * require version 3.57 of SNMP::Info with critical bug fix
+  * make netmap Color By Host Group work with no groups selected
+  * avoid SNMP::Info dependency in web frontend
+
 2.039024 - 2018-04-22
 
   [ENHANCEMENTS]
