@@ -66,6 +66,9 @@ register_worker({ phase => 'main' }, sub {
     my ($group) =
       (pairkeys pairfirst { check_acl_no($d, $b) } %{ $config->{groups} }) || $default_group;
 
+    my ($directory) =
+      (pairkeys pairfirst { check_acl_no($d, $b) } %{ $config->{directory} || {} }) || '';
+
     my ($vendor) =
       (pairkeys pairfirst { check_acl_no($d, $b) } %{ $config->{vendormap} })
         || $d->vendor;
@@ -82,15 +85,15 @@ register_worker({ phase => 'main' }, sub {
     }
 
     push @{$routerdb->{$group}},
-      (sprintf "%s${delimiter}%s${delimiter}%s", $name, $vendor,
-        ($d->get_column('old') ? 'down' : 'up'));
+      (sprintf "%s${delimiter}%s${delimiter}%s${delimiter}-${delimiter}%s", $name, $vendor,
+        ($d->get_column('old') ? 'down' : 'up'),$directory);
   }
 
   foreach my $group (keys %$routerdb) {
     mkdir dir($rancidhome, $group)->stringify;
     my $content = "#\n# Router list file for RANCID group $group.\n";
     $content .= "# Generate automatically by App::Netdisco::Worker::Plugin::MakeRancidConf\n#\n";
-    $content .= join "\n", @{$routerdb->{$group}};
+    $content .= join "\n", sort @{$routerdb->{$group}};
     write_text(file($rancidhome, $group, 'router.db')->stringify, "${content}\n");
   }
 
