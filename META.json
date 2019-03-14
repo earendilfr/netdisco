@@ -14,6 +14,13 @@
    },
    "name" : "App-Netdisco",
    "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::Config" : "0",
+            "ExtUtils::Helpers" : "0",
+            "ExtUtils::InstallPaths" : "0"
+         }
+      },
       "configure" : {
          "requires" : {
             "DBIx::Class" : "0.082810",
@@ -22,10 +29,8 @@
       },
       "runtime" : {
          "recommends" : {
-            "Expect" : "0",
             "Graph" : "0",
-            "GraphViz" : "0",
-            "Net::OpenSSH" : "0"
+            "GraphViz" : "0"
          },
          "requires" : {
             "Algorithm::Cron" : "0.07",
@@ -45,6 +50,7 @@
             "Dancer::Plugin::Passphrase" : "v2.0.1",
             "Dancer::Session::Cookie" : "0.27",
             "Data::Printer" : "0",
+            "Expect" : "0",
             "File::ShareDir" : "1.03",
             "File::Slurper" : "0.009",
             "Guard" : "1.022",
@@ -53,7 +59,7 @@
             "IO::Socket::SSL" : "2.048",
             "JSON" : "2.90",
             "JSON::XS" : "3.01",
-            "List::MoreUtils" : "0.33",
+            "List::MoreUtils" : "0.428",
             "List::Util" : "1.49",
             "MCE" : "1.703",
             "MIME::Base64" : "3.13",
@@ -62,6 +68,7 @@
             "Net::DNS" : "0.72",
             "Net::Domain" : "1.23",
             "Net::LDAP" : "0",
+            "Net::OpenSSH" : "0",
             "NetAddr::IP" : "4.068",
             "NetAddr::MAC" : "0.93",
             "Opcode" : "1.07",
@@ -74,7 +81,7 @@
             "Plack::Middleware::ReverseProxy" : "0.15",
             "Pod::Usage" : "0",
             "Role::Tiny" : "1.002005",
-            "SNMP::Info" : "3.61",
+            "SNMP::Info" : "3.65",
             "SQL::Abstract" : "1.85",
             "SQL::Translator" : "0.11024",
             "Scope::Guard" : "0",
@@ -95,6 +102,7 @@
             "YAML" : "0.84",
             "YAML::XS" : "0.41",
             "aliased" : "0",
+            "autovivification" : "0",
             "namespace::clean" : "0.24",
             "version" : "0.9902"
          }
@@ -102,6 +110,7 @@
       "test" : {
          "requires" : {
             "Env::Path" : "0",
+            "Test::Compile" : "0",
             "Test::File::ShareDir::Dist" : "0",
             "Test::More" : "1.302083"
          }
@@ -110,7 +119,7 @@
    "provides" : {
       "App::Netdisco" : {
          "file" : "lib/App/Netdisco.pm",
-         "version" : "2.039031"
+         "version" : "2.041000"
       },
       "App::Netdisco::AnyEvent::Nbtstat" : {
          "file" : "lib/App/Netdisco/AnyEvent/Nbtstat.pm"
@@ -132,7 +141,7 @@
       },
       "App::Netdisco::DB" : {
          "file" : "lib/App/Netdisco/DB.pm",
-         "version" : "53"
+         "version" : "54"
       },
       "App::Netdisco::DB::ExplicitLocking" : {
          "file" : "lib/App/Netdisco/DB/ExplicitLocking.pm"
@@ -398,6 +407,9 @@
       "App::Netdisco::SSHCollector::Platform::PaloAlto" : {
          "file" : "lib/App/Netdisco/SSHCollector/Platform/PaloAlto.pm"
       },
+      "App::Netdisco::Transport::CLI" : {
+         "file" : "lib/App/Netdisco/Transport/CLI.pm"
+      },
       "App::Netdisco::Transport::SNMP" : {
          "file" : "lib/App/Netdisco/Transport/SNMP.pm"
       },
@@ -406,6 +418,9 @@
       },
       "App::Netdisco::Util::Device" : {
          "file" : "lib/App/Netdisco/Util/Device.pm"
+      },
+      "App::Netdisco::Util::DeviceAuth" : {
+         "file" : "lib/App/Netdisco/Util/DeviceAuth.pm"
       },
       "App::Netdisco::Util::ExpandParams" : {
          "file" : "lib/App/Netdisco/Util/ExpandParams.pm"
@@ -523,6 +538,9 @@
       },
       "App::Netdisco::Web::Plugin::Device::Ports" : {
          "file" : "lib/App/Netdisco/Web/Plugin/Device/Ports.pm"
+      },
+      "App::Netdisco::Web::Plugin::Device::Vlans" : {
+         "file" : "lib/App/Netdisco/Web/Plugin/Device/Vlans.pm"
       },
       "App::Netdisco::Web::Plugin::Inventory" : {
          "file" : "lib/App/Netdisco/Web/Plugin/Inventory.pm"
@@ -772,6 +790,9 @@
       },
       "Dancer::Template::NetdiscoTemplateToolkit" : {
          "file" : "lib/Dancer/Template/NetdiscoTemplateToolkit.pm"
+      },
+      "MySession" : {
+         "file" : "lib/App/Netdisco/Transport/CLI.pm"
       }
    },
    "release_status" : "stable",
@@ -781,7 +802,7 @@
       },
       "homepage" : "http://netdisco.org/",
       "license" : [
-         "http://opensource.org/licenses/bsd-license.php"
+         "http://opensource.org/licenses/BSD-3-Clause"
       ],
       "repository" : {
          "url" : "https://github.com/netdisco/netdisco"
@@ -789,6 +810,6 @@
       "x_IRC" : "irc://irc.freenode.org/#netdisco",
       "x_MailingList" : "https://lists.sourceforge.net/lists/listinfo/netdisco-users"
    },
-   "version" : "2.039031",
+   "version" : "2.041000",
    "x_serialization_backend" : "JSON::PP version 2.97001"
 }

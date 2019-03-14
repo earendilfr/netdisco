@@ -2,7 +2,9 @@
 # NETDISCO 2 CONFIGURATION FILE
 #
 # Settings in this file override share/config.yml
-# See App::Netdisco::Manual::Configuration for more info.
+#
+# https://github.com/netdisco/netdisco/wiki/Configuration has
+# in depth explanations about each setting.
 
 # ------------------
 # ESSENTIAL SETTINGS
@@ -37,20 +39,18 @@ device_auth:
 
 
 # ¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸
+#
+# SOME MORE INTERESTING SETTINGS WHERE THE DEFAULTS ARE PROBABLY OKAY
+#
 # ¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸
 
 
-# ---------------------------------------------------------------
-# OTHER INTERESTING SETTINGS WHERE THE DEFAULTS ARE PROBABLY OKAY
-# ---------------------------------------------------------------
-
-# do not discover IP Phones or Wireless Access Points.
+# discover Wireless Access Points, but not IP Phones
 # usually these are visible as device neighbors but don't support
 # SNMP, which just clogs up the job queue.
 # ```````````````````````````````````````````````````````````````
-#discover_no_type:
-#  - '(?i)phone'
-#  - '(?i)(?:wap|wireless)'
+#discover_waps: true
+#disover_phones: false
 
 # this is the schedule for automatically keeping netdisco up-to-date;
 # these are good defaults, so only uncomment if needing to change.

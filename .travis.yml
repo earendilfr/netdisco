@@ -4,11 +4,14 @@ addons:
     packages:
       - libsnmp-dev
       - phantomjs
+  hosts:
+    - localhost
 branches:
   only:
     - /^2\.\d{6}$/
     - 'master'
-install: true
+install:
+  - cpanm --quiet --notest PkgConfig Test::CChecker Alien::zlib::Static Alien::OpenSSL::Static Alien::SNMP
 script: |
   perl Build.PL && \
   ./Build && \
@@ -16,7 +19,12 @@ script: |
   ND_PHANTOMJS=/usr/bin/phantomjs ./Build test --test_files xt/
 notifications:
   irc:
-    on_success: change
+    on_success: always
     on_failure: always
     channels:
       - 'chat.freenode.net#netdisco'
+  email:
+    on_success: always
+    on_failure: always
+    recipients:
+      - 'netdisco-ng-commit@lists.sourceforge.net'
