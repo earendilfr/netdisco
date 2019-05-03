@@ -151,7 +151,7 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
   if (defined $snmp->snmpEngineTime) {
       $dev_uptime_wrapped = int( $snmp->snmpEngineTime * 100 / 2**32 );
       if ($dev_uptime_wrapped > 0) {
-          info sprintf ' [%s] interface - device uptime wrapped %d times - correcting',
+          debug sprintf ' [%s] interfaces - device uptime wrapped %d times - correcting',
             $device->ip, $dev_uptime_wrapped;
           $device->uptime( $dev_uptime + $dev_uptime_wrapped * 2**32 );
       }
@@ -181,9 +181,16 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
           next;
       }
 
+      # Skip interfaces which are 'notPresent' and match the notpresent type filter
+      if (defined $i_up->{$entry} and defined $i_type->{$entry} and $i_up->{$entry} eq 'notPresent' and (scalar grep {$i_type->{$entry} =~ m/^$_$/} @{setting('ignore_notpresent_types') || []}) ) {
+          debug sprintf ' [%s] interfaces - ignoring %s (%s) (%s) (config:ignore_notpresent_types)',
+            $device->ip, $entry, $port, $i_up->{$entry};
+          next;
+      }
+
       my $lc = $i_lastchange->{$entry} || 0;
       if (not $dev_uptime_wrapped and $lc > $dev_uptime) {
-          info sprintf ' [%s] interfaces - device uptime wrapped (%s) - correcting',
+          debug sprintf ' [%s] interfaces - device uptime wrapped (%s) - correcting',
             $device->ip, $port;
           $device->uptime( $dev_uptime + 2**32 );
           $dev_uptime_wrapped = 1;
@@ -231,6 +238,7 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
   # must do this after building %interfaces so that we can set is_master
   foreach my $sidx (keys %$agg_ports) {
       my $slave  = $interfaces->{$sidx} or next;
+      next unless defined $agg_ports->{$sidx}; # slave without a master?!
       my $master = $interfaces->{ $agg_ports->{$sidx} } or next;
       next unless exists $interfaces{$slave} and exists $interfaces{$master};
 
@@ -263,7 +271,7 @@ sub _get_vrf_list {
         if ($vrf =~ /^\S+$/) {
             my $ctx_name = pack("C*",split(/\./,$idx));
             $ctx_name =~ s/.*[^[:print:]]+//;
-            debug sprintf(' [%s] Discover VRF %s with SNMP Context %s', $device->ip, $vrf, $ctx_name); 
+            debug sprintf(' [%s] Discover VRF %s with SNMP Context %s', $device->ip, $vrf, $ctx_name);
             push (@ok_vrfs, $ctx_name);
         }
     }

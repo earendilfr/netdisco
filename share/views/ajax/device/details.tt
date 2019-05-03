@@ -1,6 +1,6 @@
 [% SET user_can_port_control = user_has_role('port_control') %]
 <table class="table table-condensed table-striped">
-  </tbody>
+  <tbody>
     <tr>
       <td>System Name</td>
       <td>[% d.name %]</td>
@@ -50,10 +50,12 @@
     </tr>
     <tr>
       <td>OS / Version</td>
-      <td>[% d.os | html_entity %] /
-        <a rel="tooltip" data-placement="top" data-offset="5"
-          data-title="Find Similar Devices"
-          href="[% search_device %]&q=[% d.os_ver | uri %]&os_ver=[% d.os_ver | uri %]">[% d.os_ver | html_entity %]</a>
+      <td>
+        <a rel="tooltip" data-placement="top" data-offset="5" data-title="Find Similar Devices"
+        href="[% search_device %]&q=[% d.os | uri %]&os=[% d.os | uri %]">[% d.os | html_entity %]</a>
+        /
+        <a rel="tooltip" data-placement="top" data-offset="5" data-title="Find Similar Devices"
+        href="[% search_device %]&q=[% d.os_ver | uri %]&os_ver=[% d.os_ver | uri %]">[% d.os_ver | html_entity %]</a>
       </td>
     </tr>
     <tr>
@@ -93,7 +95,7 @@
     </tr>
     <tr>
       <td>SNMP Class</td>
-      <td><a target="_blank" href="https://metacpan.org/pod/[% d.snmp_class | uri %]">[% d.snmp_class | html_entity %]</td>
+      <td><a target="_blank" href="https://metacpan.org/pod/[% d.snmp_class | uri %]">[% d.snmp_class | html_entity %]</a></td>
     </tr>
     <tr>
       <td>Uptime</td>

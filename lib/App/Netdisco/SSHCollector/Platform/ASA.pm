@@ -53,7 +53,11 @@ sub arpnip {
 
     debug "$hostlabel $$ arpnip()";
 
-    my ($pty, $pid) = $ssh->open2pty or die "unable to run remote command";
+    my ($pty, $pid) = $ssh->open2pty;
+    unless ($pty) {
+        debug "unable to run remote command [$hostlabel] " . $ssh->error;
+        return ();
+    }
     my $expect = Expect->init($pty);
 
     my ($pos, $error, $match, $before, $after);
@@ -71,17 +75,21 @@ sub arpnip {
        $expect->send( $args->{enable_password} ."\n" );
     }
 
-    $prompt = qr/#/;
+    $prompt = qr/#\s*$/;
     ($pos, $error, $match, $before, $after) = $expect->expect(10, -re, $prompt);
 
     $expect->send("terminal pager 2147483647\n");
     ($pos, $error, $match, $before, $after) = $expect->expect(5, -re, $prompt);
 
+    $expect->send("show names\n");
+    ($pos, $error, $match, $before, $after) = $expect->expect(60, -re, $prompt);
+    my @names = split(m/\n/, $before);
+
     $expect->send("show arp\n");
     ($pos, $error, $match, $before, $after) = $expect->expect(60, -re, $prompt);
+    my @lines = split(m/\n/, $before);
 
     my @arpentries = ();
-    my @lines = split(m/\n/, $before);
 
     # ifname 192.0.2.1 0011.2233.4455 123
     my $linereg = qr/[A-z0-9\-\.]+\s([A-z0-9\-\.]+)\s
@@ -90,7 +98,18 @@ sub arpnip {
     foreach my $line (@lines) {
         if ($line =~ $linereg) {
             my ($ip, $mac) = ($1, $2);
-            push @arpentries, { mac => $mac, ip => $ip };
+            if ($ip !~ m/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/) {
+                foreach my $name (@names) {
+                    if ($name =~ qr/name\s([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\s([\w-]*)/x) {
+                        if ($ip eq $2) {
+                            $ip = $1;
+                        }
+                    }
+                }
+            }
+            if ($ip =~ m/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/) {
+                push @arpentries, { mac => $mac, ip => $ip };
+            }
         }
     }
 

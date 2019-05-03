@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010_000;
 
-our $VERSION = '2.039031';
+our $VERSION = '2.042008';
 use App::Netdisco::Configuration;
 
 =head1 NAME
@@ -57,9 +57,9 @@ L<Docker images|https://store.docker.com/community/images/netdisco/netdisco> are
 =back
 
 We have several other pages with tips for
-L<alternate deployment scenarios|https://github.com/netdisco/netdisco/wiki/Install-Tips>,
+L<installation tips|https://github.com/netdisco/netdisco/wiki/Install-Tips>,
 L<understanding and troubleshooting Netdisco|https://github.com/netdisco/netdisco/wiki/Troubleshooting>,
-L<tips and tricks for specific platforms|https://github.com/netdisco/netdisco/wiki/Vendor-Tips>,
+L<notes for specific device vendors|https://github.com/netdisco/netdisco/wiki/Vendor-Tips>,
 and L<all the configuration options|https://github.com/netdisco/netdisco/wiki/Configuration>.
 
 You can also speak to someone in the C<#netdisco@freenode> IRC channel, or on
@@ -70,16 +70,24 @@ L<Release Notes|https://github.com/netdisco/netdisco/wiki/Release-Notes>.
 =head1 Dependencies
 
 Netdisco has several Perl library dependencies which will be automatically
-installed. However it's I<strongly> recommended that you first install
-L<DBD::Pg>, L<SNMP>, and a compiler using your operating system packages.
+installed. However it's required that you first install the following
+operating system packages:
 
 On Ubuntu/Debian:
 
- root:~# apt-get install libdbd-pg-perl libsnmp-perl libssl-dev libio-socket-ssl-perl build-essential
+ root:~# apt-get install libdbd-pg-perl libsnmp-perl libssl-dev libio-socket-ssl-perl curl postgresql build-essential
 
 On Fedora/Red-Hat:
 
- root:~# yum install perl-core perl-DBD-Pg net-snmp-perl net-snmp-devel openssl-devel make automake gcc
+ root:~# yum install perl-core perl-DBD-Pg net-snmp-perl net-snmp-devel openssl-devel curl postgresql-server postgresql-contrib make automake gcc
+ root:~# postgresql-setup initdb
+ root:~# systemctl start postgresql
+ root:~# systemctl enable postgresql
+
+On openSUSE:
+
+ root:~# zypper refresh
+ root:~# zypper install curl automake gcc make postgresql postgresql-server openssh openssl net-snmp perl perl-DBD-Pg perl-SNMP
 
 On BSD systems please see L<our BSD tips|https://github.com/netdisco/netdisco/wiki/BSD-Install>.
 
@@ -104,9 +112,11 @@ application:
   
  postgres:~$ createdb -O netdisco netdisco
 
-The default PostgreSQL configuration isn't well tuned for modern server
-hardware. We strongly recommend that you use the C<pgtune> Python program to
-auto-tune your C<postgresql.conf> file:
+You may wish to L<amend the PostgreSQL
+configuration|https://github.com/netdisco/netdisco/wiki/Install-Tips#enable-md5-authentication-to-postgresql>
+so that local connections are working.  The default PostgreSQL configuration
+also needs tuning for modern server hardware. We recommend that you use the
+C<pgtune> Python program to auto-tune your C<postgresql.conf> file:
 
 =over 4
 
@@ -127,7 +137,7 @@ documentation for further details.
 
 To avoid muddying your system, use the following script to download and
 install Netdisco and its dependencies into the C<netdisco> user's home area
-(C<~netdisco/perl5>):
+(C<~/perl5>):
 
  su - netdisco
  curl -L https://cpanmin.us/ | perl - --notest --local-lib ~/perl5 App::Netdisco
@@ -194,7 +204,7 @@ port control, etc):
  ~/bin/netdisco-backend start
 
 I<note:> Whenever you upgrade your operating system, you should delete the
-C<~netdisco/perl5> directory and re-run the C<curl> command above, to update
+C<~/perl5> directory and re-run the C<curl> command above, to update
 Netdisco's C library bindings.
 
 I<also note:> You should take care not to run C<< netdisco-backend >> and the
@@ -312,7 +322,7 @@ of Waikato, Hamilton NZ), Dusty Hall (Auburn U), Jon Monroe (center pointe),
 Alexander Barthel, Bill Anderson, Alexander Hartmaier (t-systems.at), Justin
 Hunter (Arizona State U), Jethro Binks (U of Strathclyde, Glasgow), Jordi
 Guijarro (UAB.es), Sam Stickland (spacething.org),  Stefan Radman (CTBTO.org),
-Clint Wise, Max Kosmach, and Bernhard Augenstein.
+Clint Wise, Max Kosmach, Bernhard Augenstein and Nick Nauwelaerts (aquafin.be).
 
 We probably forgot some names - sorry about that :-(.
 

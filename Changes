@@ -1,3 +1,238 @@
+2.042008 - 2019-04-30
+
+  [ENHANCEMENTS]
+
+  * improve check_acl performance for basic IP string compare
+
+2.042007 - 2019-04-28
+
+  [ENHANCEMENTS]
+
+  * #564 allow passing multiple -d (devices) to netdisco-do
+  * #568 use different icon for WAPs from clients
+  * improve check_acl performance for basic IP string compare
+
+2.042006 - 2019-04-16
+
+  [ENHANCEMENTS]
+
+  * #558 netdisco-rancid-export is now a no-op (inphobia)
+  * hide the ignored duplicate jobs in the web job queue display
+
+  [BUG FIXES]
+
+  * #549 redux - fix for changing pseudo device ports
+  * fix inconsistency in titlebar global search when port is selected
+
+2.042005 - 2019-04-03
+
+  [ENHANCEMENTS]
+
+  * #528 record egress untagged vlans in device_port_vlan table
+
+  [BUG FIXES]
+
+  * clickability of port log/control icons in port list display (pyro3d)
+  * #549 clean manual topology after device ports change
+  * #551 better error message for both device_auth and snmp_auth
+  * #552 device addresses report has broken column data
+
+2.042004 - 2019-03-28
+
+  [ENHANCEMENTS]
+
+  * #548 add IS-IS neighbor discovery support (pyro3d)
+
+2.042003 - 2019-03-21
+
+  [BUG FIXES]
+
+  * minor enhancement to the way device_auth falls back to snmp_auth
+
+2.042002 - 2019-03-20
+
+  [ENHANCEMENTS]
+
+  * allow pseudo devices to arpnip
+
+  [BUG FIXES]
+
+  * the store worker phase will return more accurate status
+
+2.042001 - 2019-03-18
+
+  [BUG FIXES]
+
+  * Do not clobber sshcollector config
+
+2.042000 - 2019-03-17
+
+  [NEW FEATURES]
+
+  * Implementation of API authentication and Swagger-UI (pyro3d and ollyg)
+
+2.041002 - 2019-03-17
+
+  [BUG FIXES]
+
+  * fix precedence of device_auth over snmp_auth loading
+  * check legacy config name for nbtstat_response_timeout
+
+2.041001 - 2019-03-15
+
+  [ENHANCEMENTS]
+
+  * add "store" and "late" phases to backend workers
+  * documentation updates
+
+  [BUG FIXES]
+
+  * #539 fix an issue with VLAN reindixing for VRFs (earendilfr)
+  * fix device port change check
+
+2.041000 - 2019-03-12
+
+  [NEW FEATURES]
+
+  * netdisco-sshcollector no longer required - the functionality (arpnip via
+    ssh) will be run within netdisco's core schedule (rc9000 and ollyg)
+
+  * get_credentials replaces get_community and accepts any device_auth stanza
+    in JSON format (ollyg)
+
+2.040007 - 2019-03-06
+
+  [BUG FIXES]
+
+  * #521-redux Search Node Date Range not working (ollyg)
+
+2.040006 - 2019-03-04
+
+  [BUG FIXES]
+
+  * #527 update List::MoreUtils version requirement
+
+2.040005 - 2019-03-04
+
+  [BUG FIXES]
+
+  * #526 fix discover syntax bug
+
+2.040004 - 2019-03-03
+
+  [NEW FEATURES]
+
+  * #510 store ifindex in Device Port Properties table (rc9000)
+  * new discover_waps and discover_phones boolean settings (ollyg)
+
+  [ENHANCEMENTS]
+
+  * #428 Port-Channels now showing in netmap (ollyg)
+  * #490 use new LLDP capability checks for ports having phones (ollyg)
+  * #494 update Cisco ASA ssh collector (stromsoe)
+
+  [BUG FIXES]
+
+  * #492 Port Control incorrectly uses VLAN config check (inphobia)
+  * #493 HTML tag fix (inphobia)
+  * #498 Map with VLAN filter omits unconnected devices (ollyg)
+  * #499 netdisco-do renumber reports wrong ip (inphobia)
+  * #500 no more duplicate entries in vlan filter (ollyg)
+  * #505 renumbering device missed a few tables (ollyg)
+  * #512 fix regression in phone/wap discovery exclusion (ollyg)
+  * #514 ipinventory report returns consistent data (inphobia)
+  * #520 make sure aggports have a master<->slave (ollyg)
+  * #521 Search Node Date Range not working (ollyg)
+  * #522 TypeAhead.pm can reference empty data (inphobia)
+  * fix bug showing no nodes when only one matches in netmap (ollyg)
+
+2.040003 - 2019-01-18
+
+  [NEW FEATURES]
+  
+  * #485 new "VLANs" device tab showing a VLAN report (inphobia)
+
+  [ENHANCEMENTS]
+
+  * #408, #417 & 477 makerancidconf improvements re-added (earendilfr, inphobia)
+  * #420 IP Inventory Node column renamed to IP Address (ollyg)
+  * #420 sidebar defaults for IP Inventory report can be overridden (ollyg)
+  * #424 column name is "Connected Nodes & Devices" when both are shown (ollyg)
+  * #436 make neighbor matching less strict in netmap (linwood-f)
+  * #482 operating system is now a link in device details (inphobia)
+  * #486 allow snmp::info base class in netdisco-do (inphobia)
+
+  [BUG FIXES]
+
+  * #457 make sorting work for adresses when interface was undefined (inphobia)
+  * #471-redux ospf discovery will now keep on working (ollyg)
+  * #474 better explain public key auth with netdisco-sshcollector (inphobia)
+  * #475, #479 all discover plugins should now respect ignore_* for interfaces (ollyg)
+  * #476 debug log when deleting rows from related tables (ollyg)
+  * Fix to catch when txrate on wifi is scalar and not a list
+  * Remove 'use vars' which is deprecated in Perl
+  * Various documentation improvements (inphobia)
+
+2.040002 - 2018-12-30
+
+  [BUG FIXES]
+
+  * correction for git sync
+
+2.040001 - 2018-12-30
+
+  [ENHANCEMENTS]
+
+  * #471 OSPF neighbor discovey will try Router ID as well as Peer ID
+  * update dependency to SNMP::Info 3.64
+
+  [BUG FIXES]
+
+  * #422 fix for Network Map positions not saving (onlinehupe)
+  * fix portsort tests to work with PhantomJS 2.x
+  * some documentation fixes (inphobia)
+
+2.040000 - 2018-12-28
+
+  [NEW FEATURES]
+
+  * #464 ignore_notpresent_types config to ignore notPresent interfaces (inphobia, nic)
+  * #469 jobs_qdepth config to set length of job queue in web view (inphobia)
+
+  [ENHANCEMENTS]
+
+  * #459 additional interface type to ignore (inphobia)
+  * #460 several improvements to netdisco-sshcollector (rc9000)
+
+  [BUG FIXES]
+
+  * #456 fix POD error (manwar)
+  * #461 provide stdin to sshcollector (rc9000)
+  * #467 documentation fixes (inphobia)
+
+2.039033 - 2018-10-19
+
+  [BUG FIXES]
+
+  * #446 fix typo in NodeVendor report - rflor
+
+2.039032 - 2018-10-19
+
+  [ENHANCEMENTS]
+
+  * #433 add status note when updating stats in netdisco-deploy - jrbinks
+  * #434 shuffle input array for sshcollector - stromsoe
+  * #438 add some more interface names to ignore
+  * #439 add expire_userlog with default 365 days
+  * #443 attempt to handle IPs and Names in show arp output - darknicht66
+
+  [BUG FIXES]
+
+  * #427 fix NodeVendor.pm to show distinct MACs - slofunk
+  * #431 sshcollector calls die() even if all the work is not done - stromsoe
+  * #435 netdisco-deploy allows blank admin password
+  * fix error in ignore_interfaces regexp - inphobia
+
 2.039031 - 2018-06-17
 
   [ENHANCEMENTS]

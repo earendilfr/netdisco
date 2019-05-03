@@ -270,10 +270,12 @@ sub jq_complete {
 }
 
 sub jq_log {
-  return schema('netdisco')->resultset('Admin')->search({}, {
+  return schema('netdisco')->resultset('Admin')->search({
+    'me.log' => { '-not_like' => 'duplicate of %' },
+  }, {
     prefetch => 'target',
     order_by => { -desc => [qw/entered device action/] },
-    rows => 50,
+    rows     => (setting('jobs_qdepth') || 50),
   })->with_times->hri->all;
 }
 
@@ -281,6 +283,7 @@ sub jq_userlog {
   my $user = shift;
   return schema('netdisco')->resultset('Admin')->search({
     username => $user,
+    log      => { '-not_like' => 'duplicate of %' },
     finished => { '>' => \"(now() - interval '5 seconds')" },
   })->with_times->all;
 }

@@ -77,9 +77,8 @@ This script will download the latest MAC address vendor prefix data from the
 Internet, and update the OUI table in the database. Hence Internet access is
 required to run the script.
 
-Similarly the latest Netdisco MIB bundle is also downloaded, placed into the
-user's home directory (or C<$ENV{NETDISCO_HOME}>), and Netdisco reconfigured
-for its use.
+Similarly the latest Netdisco MIB bundle is also downloaded and placed into
+the user's home directory (or C<$ENV{NETDISCO_HOME}>).
 
 =cut
 
@@ -99,7 +98,7 @@ print color 'reset';
 
 my $term = Term::ReadLine->new('netdisco');
 my $bool = $term->ask_yn(
-  prompt => 'So, is all the above in place?', default => 'n',
+  prompt => 'So, is all of the above in place?', default => 'n',
 );
 
 exit(0) unless $bool;
@@ -140,9 +139,10 @@ sub deploy_db {
   say 'DB schema update complete.';
   print color 'reset';
 
-  App::Netdisco::Util::Statistics::update_stats();
   print color 'bold blue';
-  say 'Statistics updated.';
+  print 'Updating statistics... ';
+  App::Netdisco::Util::Statistics::update_stats();
+  say 'done.';
   print color 'reset';
 
   if (not setting('safe_password_store')) {
@@ -168,14 +168,12 @@ sub deploy_db {
   if ($users->search({-bool => 'admin'})->count == 0) {
       say '';
       print color 'bold green';
-      say 'We need to create a user for inital login. This user will be a full Administrator.';
+      say 'We need to create a user for initial login. This user will be a full Administrator.';
       say 'Afterwards, you can go to Admin -> User Management to manage users.';
       print color 'reset';
       say '';
 
-      my $name = $term->get_reply(prompt => 'Username: ');
-      my $pass = $term->get_reply(prompt => 'Password: ');
-
+      my ($name, $pass) = get_userpass($term);
       $users->create({
         username => $name,
         password => _make_password($pass),
@@ -193,6 +191,19 @@ sub deploy_db {
     {id => 'dancer_session_cookie_key', a_session => \'md5(random()::text)'},
     {key => 'primary'},
   );
+}
+
+sub get_userpass {
+  my $term = shift;
+  my $name = $term->get_reply(prompt => 'Username: ');
+  my $pass = $term->get_reply(prompt => 'Password: ');
+
+  unless ($name and $pass) {
+    say 'username and password cannot be empty, please try again.';
+    ($name, $pass) = get_userpass($term);
+  }
+
+  return ($name, $pass);
 }
 
 sub deploy_oui {
@@ -262,7 +273,7 @@ sub shorten {
 
     # Remove any "the", "inc", "plc" ...
     $manuf
-        =~ s/\s(the|inc|incorporated|plc||systems|corp|corporation|s\/a|a\/s|ab|ag|kg|gmbh|co|company|limited|ltd|holding|spa)(?= )//gi;
+        =~ s/\s(the|inc|incorporated|plc|systems|corp|corporation|s\/a|a\/s|ab|ag|kg|gmbh|co|company|limited|ltd|holding|spa)(?= )//gi;
 
     # Convert to consistent case
     $manuf =~ s/(\w+)/\u\L$1/g;

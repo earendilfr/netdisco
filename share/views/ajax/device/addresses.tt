@@ -32,10 +32,10 @@ $(document).ready(function() {
         "render": function(data, type, row, meta) {
           return type === 'display' ?
             '<a href="[% device_ports %]&q=' + encodeURIComponent(row.ip) + '&f=' + encodeURIComponent(data) + '">' + he.encode(data || '') + '</a>' :
-            data;
+            he.encode(data || '');
         }
       }, {
-        "data": 'name',
+        "data": 'device_port.name',
         "render": function(data, type, row, meta) {
           return he.encode(data || '');
         }
