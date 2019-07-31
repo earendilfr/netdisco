@@ -45,20 +45,6 @@ register_worker({ phase => 'main' }, sub {
   return Status->error("You didn't have any device types configured in your rancid installation.")
     if ! scalar keys %$allowed_types;
 
-  my $allowed_types = {};
-  foreach my $type (qw/base conf/) {
-    my $type_file = file($rancidconf, "rancid.types.$type")->stringify;
-    next unless -f $type_file;
-    my @lines = read_lines($type_file);
-    foreach my $line (@lines) {
-      next if $line =~ m/^(?:\#|\$)/;
-      $allowed_types->{$1} += 1 if $line =~ m/^([-a-z0-9_]+);login;.*$/;
-    }
-  }
-  
-  return Status->error("You didn't have any type configured in your RANCiD installation.")
-    if ! scalar keys %$allowed_types;
-
   my $devices = schema('netdisco')->resultset('Device')->search(undef, {
     '+columns' => { old =>
       \['age(now(), last_discover) > ?::interval', $down_age] },
@@ -237,17 +223,6 @@ Put devices into this group if they do not match any other groups defined.
 
 This dictionary defines a list of devices that you do not wish to export to
 rancid configuration.
-
-The value should be a L<Netdisco ACL|https://github.com/netdisco/netdisco/wiki/Configuration#access-control-lists>
-to select devices in the Netdisco database.
-
-=head2 C<default_group>
-
-Put devices into this group if they do not match other groups defined.
-
-=head2 C<excluded>
-
-This dictionary define a list of device that you do not wish to export to RANCID configuration.
 
 The value should be a L<Netdisco ACL|https://github.com/netdisco/netdisco/wiki/Configuration#access-control-lists>
 to select devices in the Netdisco database.
