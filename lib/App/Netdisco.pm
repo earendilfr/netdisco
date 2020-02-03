@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010_000;
 
-our $VERSION = '2.042010';
+our $VERSION = '2.044012';
 use App::Netdisco::Configuration;
 
 =head1 NAME
@@ -71,7 +71,8 @@ L<Release Notes|https://github.com/netdisco/netdisco/wiki/Release-Notes>.
 
 Netdisco has several Perl library dependencies which will be automatically
 installed. However it's required that you first install the following
-operating system packages:
+operating system packages, if not the installation will most likely fail
+further down the road.
 
 On Ubuntu/Debian:
 
@@ -115,14 +116,25 @@ application:
 You may wish to L<amend the PostgreSQL
 configuration|https://github.com/netdisco/netdisco/wiki/Install-Tips#enable-md5-authentication-to-postgresql>
 so that local connections are working.  The default PostgreSQL configuration
-also needs tuning for modern server hardware. We recommend that you use the
-C<pgtune> Python program to auto-tune your C<postgresql.conf> file:
+can also use tuning for modern server hardware. We recommend that you use one of the following
+tools to tune your C<postgresql.conf> file:
 
 =over 4
 
-=item *
+=item L<postgresqltuner|https://github.com/jfcoz/postgresqltuner>
 
-L<https://github.com/elitwin/pgtune>
+Script that will check your operating system resources and settings as well as your
+running PostgreSQL database and will make recommendations based on actual load. Works
+on new netdisco installs but will make the best suggestions once the database contains
+a bigger dataset.
+
+=item L<pgtune (fork)|https://pgtune.leopard.in.ua>
+
+A web based application which will recommend which parameters to change.
+
+=item L<pgtune|https://github.com/elitwin/pgtune>
+
+Program to auto-tune your C<postgresql.conf>, regretfully not updated in a while.
 
 =back
 
@@ -203,16 +215,21 @@ port control, etc):
 
  ~/bin/netdisco-backend start
 
-I<note:> Whenever you upgrade your operating system, you should delete the
-C<~/perl5> directory and re-run the C<curl> command above, to update
-Netdisco's C library bindings.
+=head1 First Run
 
-I<also note:> You should take care not to run C<< netdisco-backend >> and the
-Netdisco 1.x daemon at the same time. Similarly, if you use the device
-discovery with Netdisco 2, disable your system's cron jobs for the Netdisco
-1.x poller.
+After installing Netdisco for the first time, you must manually discover at
+least one device on your network.  Choose a device which speaks CDP, FDP, or
+LLDP and knows about its neighbors; Netdisco will then start following this
+chain of neighbors to discover the rest of your network.
 
-We have several other pages with tips for
+Either go to the web interface and enter an IP or fully qualified domain name,
+OR perform the following step at the command line:
+
+ ~/bin/netdisco-do discover -d {name or IP address of a switch or router}
+
+=head1 Further Reading
+
+We have several pages with tips for
 L<alternate deployment scenarios|https://github.com/netdisco/netdisco/wiki/Install-Tips>,
 L<understanding and troubleshooting Netdisco|https://github.com/netdisco/netdisco/wiki/Troubleshooting>,
 L<tips and tricks for specific platforms|https://github.com/netdisco/netdisco/wiki/Vendor-Tips>,
@@ -225,11 +242,7 @@ L<Release Notes|https://github.com/netdisco/netdisco/wiki/Release-Notes>.
 
 =head1 Upgrading from 2.x
 
-If you're running a version of Netdisco prior to 2.x then you should follow
-the full installation instructions, above. This process is for upgrading
-version 2.x only.
-
-Before upgrading please review the latest L<Release Notes|https://github.com/netdisco/netdisco/wiki/Release-Notes>.
+Always review the latest L<Release Notes|https://github.com/netdisco/netdisco/wiki/Release-Notes>.
 Then the process below should be run for each installation:
 
  # upgrade Netdisco
@@ -245,13 +258,19 @@ Then the process below should be run for each installation:
  # restart the backend workers (wherever you run them)
  ~/bin/netdisco-backend restart
 
+Furthermore, whenever you upgrade your Operating System, you must delete the
+C<~/perl5> directory and re-run the following command, to update Netdisco's C
+library bindings:
+
+ curl -L https://cpanmin.us/ | perl - --notest --local-lib ~/perl5 App::Netdisco
+
 =head1 Tips and Tricks
 
 =head2 Searching
 
 The main black navigation bar has a search box which is smart enough to work
 out what you're looking for in most cases. For example device names, node IP
-or MAC addreses, VLAN numbers, and so on.
+or MAC addresses, VLAN numbers, and so on.
 
 =head2 Command-Line Device and Port Actions
 
@@ -332,7 +351,7 @@ built upon.
 
 =head1 COPYRIGHT AND LICENSE
  
-This software is copyright (c) 2011-2018 by The Netdisco Developer Team.
+This software is copyright (c) 2011-2019 by The Netdisco Developer Team.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:

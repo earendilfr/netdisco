@@ -30,11 +30,11 @@ register_worker({ phase => 'main', driver => 'snmp' }, sub {
   # cache the device ports to save hitting the database for many single rows
   my $device_ports = {map {($_->port => $_)}
                           $device->ports(undef, {prefetch => {neighbor_alias => 'device'}})->all};
-  my $port_macs = get_port_macs();
+
   my $interfaces = $snmp->interfaces;
 
   # get forwarding table data via basic snmp connection
-  my $fwtable = walk_fwtable($device, $interfaces, $port_macs, $device_ports);
+  my $fwtable = walk_fwtable($device, $interfaces, $device_ports);
 
   # ...then per-vlan if supported
   my @vlan_list = get_vlan_list($device);
@@ -43,7 +43,7 @@ register_worker({ phase => 'main', driver => 'snmp' }, sub {
     foreach my $vlan (@vlan_list) {
       snmp_comm_reindex($snmp, $device, $vlan);
       my $pv_fwtable =
-        walk_fwtable($device, $interfaces, $port_macs, $device_ports, $vlan);
+        walk_fwtable($device, $interfaces, $device_ports, $vlan);
       $fwtable = {%$fwtable, %$pv_fwtable};
     }
   }
@@ -78,7 +78,7 @@ register_worker({ phase => 'main', driver => 'snmp' }, sub {
   debug sprintf ' [%s] macsuck - %s updated forwarding table entries',
     $device->ip, $total_nodes;
 
-  # a use for $now ... need to archive dissapeared nodes
+  # a use for $now ... need to archive disappeared nodes
   my $archived = 0;
 
   if (setting('node_freshness')) {
@@ -105,7 +105,7 @@ All four fields in the tuple are required. If you don't know the VLAN ID,
 Netdisco supports using ID "0".
 
 Optionally, a fifth argument can be the literal string passed to the time_last
-field of the database record. If not provided, it defauls to C<now()>.
+field of the database record. If not provided, it defaults to C<now()>.
 
 =cut
 
@@ -265,17 +265,21 @@ sub get_vlan_list {
 # walks the forwarding table (BRIDGE-MIB) for the device and returns a
 # table of node entries.
 sub walk_fwtable {
-  my ($device, $interfaces, $port_macs, $device_ports, $comm_vlan) = @_;
+  my ($device, $interfaces, $device_ports, $comm_vlan) = @_;
   my $skiplist = {}; # ports through which we can see another device
   my $cache = {};
 
   my $snmp = App::Netdisco::Transport::SNMP->reader_for($device)
     or return $cache; # already checked!
 
-  my $fw_mac   = $snmp->fw_mac;
-  my $fw_port  = $snmp->fw_port;
-  my $fw_vlan  = $snmp->qb_fw_vlan;
-  my $bp_index = $snmp->bp_index;
+  my $fw_mac   = $snmp->fw_mac || {};
+  my $fw_port  = $snmp->fw_port || {};
+  my $fw_vlan  = ($snmp->can('cisco_comm_indexing') && $snmp->cisco_comm_indexing()) 
+    ? {} : $snmp->qb_fw_vlan;
+  my $bp_index = $snmp->bp_index || {};
+
+  my @fw_mac_list = values %$fw_mac;
+  my $port_macs = get_port_macs(\@fw_mac_list);
 
   # to map forwarding table port to device port we have
   #   fw_port -> bp_index -> interfaces

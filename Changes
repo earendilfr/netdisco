@@ -1,3 +1,150 @@
+2.044012 - 2020-02-01
+
+  [ENHANCEMENTS]
+
+  * #680 redux - speed up macsuck again (rc9000)
+
+  [BUG FIXES]
+
+  * prevent Template::AutoFilter taking action on CSV output
+
+2.044011 - 2020-01-26
+
+  [BUG FIXES]
+
+  * Correct #680 reduce macsuck bandwidth
+
+2.044010 - 2020-01-25
+
+  [BUG FIXES]
+
+  * #696 complete implementation of #688
+
+2.044009 - 2020-01-23
+
+  [ENHANCEMENTS]
+
+  * SSH collector for Extreme VSP devices running the VOSS operating system (antonc42)
+
+2.044008 - 2020-01-23
+
+  [BUG FIXES]
+
+  * Fix dates in changelog (osmogr)
+
+2.044007 - 2020-01-22
+
+  [ENHANCEMENTS]
+
+  * Better fix for #677
+
+2.044006 - 2020-01-22
+
+  [BUG FIXES]
+
+  * #677 neighbors map with VLAN filter should only consider configured ports
+
+2.044005 - 2020-01-19
+
+  [ENHANCEMENTS]
+
+  * #668 VLAN search results show number of device ports using the VLAN
+  * #671 netdisco-do discover should immediately queue macsuck+arpnip
+  * #673 disable arpnip/macsuck buttons for devices not supporting those layers
+  * #680 reduce macsuck bandwidth usage to database (rc9000)
+  * #681 custom reports can be configured to make results searchable links
+  * #687 add web_home setting for home page after logging in
+
+  [BUG FIXES]
+
+  * #81  (redux) avoid DEPRECATED warning from DBIC
+  * #524 ipinventory misses mac address for device ips
+  * #676 remove vim settings from files
+  * #677 neighbors map with VLAN filter should only consider configured ports
+  * #679 uninitialised error
+  * #686 makerancidconf excluded setting should be (ACL) list not dict
+
+2.044004 - 2019-10-30
+
+  [BUG FIXES]
+
+  * #669 check device is in storage before layers check (pyro3d)
+
+2.044003 - 2019-10-15
+
+  [NEW FEATURES]
+
+  * #662 add TACACS+ support
+
+  [ENHANCEMENTS]
+
+  * #659 speed up Macsuck::Nodes while using $snmp->cisco_comm_indexing
+  * #663 sortable device OS version numbers
+  * ignore *_min_age when running jobs from netdisco-do
+
+  [BUG FIXES]
+
+  * jquery issue - CVE-2019-11358
+
+2.044002 - 2019-10-01
+
+  [BUG FIXES]
+
+  * Typo in install documentation
+
+2.044001 - 2019-09-26
+
+  [BUG FIXES]
+
+  * #654 Device Ports list is not sorting numerically
+
+2.044000 - 2019-09-23
+
+  [NEW FEATURES]
+
+  * #646 Add DOCSIS (Cable Modem) peers discovery as neighbors (pyro3d)
+  * #650 Add administrative port speed setting storage and display (C. Ramseyer)
+
+  [BUG FIXES]
+
+  * Enforce escaping on all template content
+  * Fix potential crash in Discover/Properties::_get_ipv6_aliases (C. Ramseyer)
+
+2.043001 - 2019-09-04
+
+  [BUG FIXES]
+
+  * #644 Device DNS Mismatch report broken by domain_suffix change
+
+2.043000 - 2019-09-03
+
+  [NEW FEATURES]
+
+  * #591 domain_suffix can be a list and supports (simple) regexp
+  * #613 Free Ports works even if the device has rebooted recently
+  * #621 RADIUS authentication support for users
+
+  [ENHANCEMENTS]
+
+  * #587 #561 update pseudo devices to better support ssh arpnip
+  * #606 license file reformatted to work better within Github
+  * #630 display full OUI vendor name in web view
+  * #633 change Port Free icon to be more accessible
+  * #638 avoid page reload on admintask data updates
+  * #640 some documentation fixes
+  * add PoE on-off icons to legend in Device Ports view
+
+  [BUG FIXES]
+
+  * #610 better MAC addr input sanity checking
+  * #611 compare IEEE MAC addresses properly
+  * #622 workaround for changes in Test::Compile
+  * #624 device layers search should be OR (not AND)
+  * #625 make sidebar tiny bit wider
+  * #642 requests to /admin/unknown-thing should get 404
+  * handle row.power.power being NULL
+  * allow stats to run smoothly on ancient Pg 8.4
+
 2.042010 - 2019-06-02
 
   [BUG FIXES]

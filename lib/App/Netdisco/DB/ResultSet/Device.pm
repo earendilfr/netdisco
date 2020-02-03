@@ -187,11 +187,11 @@ Will match exactly the C<model> field.
 
 =item os
 
-Will match exactly the C<os> field, which is the operating sytem.
+Will match exactly the C<os> field, which is the operating system.
 
 =item os_ver
 
-Will match exactly the C<os_ver> field, which is the operating sytem software version.
+Will match exactly the C<os_ver> field, which is the operating system software version.
 
 =item vendor
 
@@ -226,21 +226,20 @@ sub search_by_field {
     }
 
     # For Search on Layers
-    my @layer_search = ( '_', '_', '_', '_', '_', '_', '_' );
-    # @layer_search is computer indexed, left->right
     my $layers = $p->{layers};
+    my @layer_select = ();
     if ( defined $layers && ref $layers ) {
       foreach my $layer (@$layers) {
         next unless defined $layer and length($layer);
         next if ( $layer < 1 || $layer > 7 );
-        $layer_search[ $layer - 1 ] = 1;
+        push @layer_select,
+          \[ 'substring(me.layers,9-?, 1)::int = 1', $layer ];
       }
     }
     elsif ( defined $layers ) {
-      $layer_search[ $layers - 1 ] = 1;
+      push @layer_select,
+        \[ 'substring(me.layers,9-?, 1)::int = 1', $layers ];
     }
-    # the database field is in order 87654321
-    my $layer_string = join( '', reverse @layer_search );
 
     return $rs
       ->search_rs({}, $attrs)
@@ -252,8 +251,6 @@ sub search_by_field {
             { '-ilike' => "\%$p->{location}\%" }) : ()),
           ($p->{description} ? ('me.description' =>
             { '-ilike' => "\%$p->{description}\%" }) : ()),
-          ($p->{layers} ? ('me.layers' =>
-            { '-ilike' => "\%$layer_string" }) : ()),
 
           ($p->{model} ? ('me.model' =>
             { '-in' => $p->{model} }) : ()),
@@ -263,6 +260,8 @@ sub search_by_field {
             { '-in' => $p->{os_ver} }) : ()),
           ($p->{vendor} ? ('me.vendor' =>
             { '-in' => $p->{vendor} }) : ()),
+
+          ($p->{layers} ? (-or => \@layer_select) : ()),
 
           ($p->{dns} ? (
             -or => [
@@ -387,7 +386,8 @@ Results are ordered by the Device DNS and IP fields.
 
 =item *
 
-Related rows from the C<device_vlan> table will be prefetched.
+Column C<pcount> gives a count of the number of ports on the device
+that are actually configured to carry the VLAN.
 
 =back
 
@@ -405,13 +405,16 @@ sub carrying_vlan {
       ->search_rs({ 'vlans.vlan' => $cond->{vlan} },
         {
           order_by => [qw/ me.dns me.ip /],
-            columns  => [
-                'me.ip',     'me.dns',
-                'me.model',  'me.os',
-                'me.vendor', 'vlans.vlan',
-                'vlans.description'
-            ],
-            join => 'vlans'
+          select => [{ count => 'ports.vlan' }],
+          as => ['pcount'],
+          columns  => [
+              'me.ip',     'me.dns',
+              'me.model',  'me.os',
+              'me.vendor', 'vlans.vlan',
+              'vlans.description'
+          ],
+          join => {'vlans' => 'ports'},
+          distinct => 1,
         })
       ->search({}, $attrs);
 }
@@ -439,7 +442,8 @@ Results are ordered by the Device DNS and IP fields.
 
 =item *
 
-Related rows from the C<device_vlan> table will be prefetched.
+Column C<pcount> gives a count of the number of ports on the device
+that are actually configured to carry the VLAN.
 
 =back
 
@@ -457,13 +461,16 @@ sub carrying_vlan_name {
     return $rs
       ->search_rs({}, {
         order_by => [qw/ me.dns me.ip /],
-          columns  => [
-              'me.ip',     'me.dns',
-              'me.model',  'me.os',
-              'me.vendor', 'vlans.vlan',
-              'vlans.description'
-          ],
-          join => 'vlans'
+        select => [{ count => 'ports.vlan' }],
+        as => ['pcount'],
+        columns  => [
+            'me.ip',     'me.dns',
+            'me.model',  'me.os',
+            'me.vendor', 'vlans.vlan',
+            'vlans.description'
+        ],
+        join => {'vlans' => 'ports'},
+        distinct => 1,
       })
       ->search($cond, $attrs);
 }

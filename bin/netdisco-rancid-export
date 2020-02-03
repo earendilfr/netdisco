@@ -46,7 +46,7 @@ use App::Netdisco::Util::Permission ':all';
 exit(0) unless setting('use_legacy_rancidexport');
 
 my $settings = setting( 'rancid' );
-my $domain_suffix = setting( 'domain_suffix' ) || '';
+my $domain_suffix = setting( 'domain_suffix' );
 my $delimiter = $settings->{ 'delimiter' } || ':';
 my $down_age = $settings->{ 'down_age' } || '1 day';
 my $rancidconf = $settings->{ 'rancid_conf' } || '/etc/rancid';
@@ -154,26 +154,8 @@ foreach my $group (keys %$list) {
         printf(STDERR "The device $name didn't have been exported because the type didn't have been found\n");
       }
     }
-  } else {
-    foreach my $dev (sort {($a->dns || $a->name) cmp ($b->dns || $b->name)} @{$list->{$group}}) {
-      my $vendor = $dev->vendor || '';
-      my $vendormodel = join(':',$dev->vendor || '',$dev->model || '');
-      my $name = ($dev->dns || $dev->name);
-      if ( $config_vendormap->{$vendor} or $config_vendormap->{$vendormodel} ) {
-        $vendor = $config_vendormap->{$vendormodel} || $config_vendormap->{$vendor};
-      } elsif ( $VENDORMAP{$vendor} or $VENDORMAP{$vendormodel} ) {
-        $vendor = $VENDORMAP{$vendormodel} || $VENDORMAP{$vendor};
-      }
-      if ($name ne '' && $vendor ne '' && exists($allowed_types->{$vendor})) {
-        $name =~ s/$domain_suffix$// if ($by_hostname->{$group});
-        printf(ROUTER "%s$delimiter%s$delimiter%s$delimiter-$delimiter%s\n",
-          $name,
-          $vendor,
-          $dev->get_column( 'old' ) || '' ? "down" : "up",
-          $dev->{dir});
-      } else {
-        printf(STDERR "The device $name didn't have been exported because the type didn't have been found\n");
-      }
+    if ($by_hostname->{$group}) {
+      $name =~ s/$domain_suffix//;
     }
   }
   close(ROUTER);

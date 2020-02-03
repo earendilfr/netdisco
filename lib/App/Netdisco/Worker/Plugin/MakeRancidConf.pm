@@ -18,7 +18,7 @@ register_worker({ phase => 'main' }, sub {
   my ($job, $workerconf) = @_;
   my $config = setting('rancid') || {};
 
-  my $domain_suffix = setting('domain_suffix') || '';
+  my $domain_suffix = setting('domain_suffix');
   my $delimiter = $config->{delimiter} || ';';
   my $down_age  = $config->{down_age} || '1 day';
   my $default_group = $config->{default_group} || 'default';
@@ -52,9 +52,14 @@ register_worker({ phase => 'main' }, sub {
 
   $config->{groups}    ||= { default => 'any' };
   $config->{vendormap} ||= {};
-  $config->{excluded}  ||= {};
-  $config->{by_ip}       ||= {};
-  $config->{by_hostname} ||= {};
+  $config->{excluded}    ||= [];
+  $config->{by_ip}       ||= [];
+  $config->{by_hostname} ||= [];
+
+  # fix #686 excluded setting should be (ACL) list not dict
+  if (ref {} eq ref $config->{excluded}) {
+    $config->{excluded} = [ values %{ $config->{excluded} } ];
+  }
 
   my $routerdb = {};
   while (my $d = $devices->next) {
@@ -65,7 +70,7 @@ register_worker({ phase => 'main' }, sub {
     }
 
     my $name = check_acl_no($d, $config->{by_ip}) ? $d->ip : ($d->dns || $d->name);
-    $name =~ s/$domain_suffix$// if check_acl_no($d, $config->{by_hostname});
+    $name =~ s/$domain_suffix// if check_acl_no($d, $config->{by_hostname});
 
     my ($group) =
       (pairkeys pairfirst { check_acl_no($d, $b) } %{ $config->{groups} }) || $default_group;
@@ -150,17 +155,17 @@ C<rancid>. All keys are optional:
    down_age:        '1 day'                      # default
    delimiter:       ';'                          # default
    default_group:   'default'                    # default 
-   excluded:
-     excludegroup1: 'host_group1_acl'
-     excludegroup2: 'host_group2_acl'
    groups:
-     groupname1:    'host_group3_acl'
-     groupname2:    'host_group4_acl'
+     groupname1:    'host_group1_acl'
+     groupname2:    'host_group2_acl'
    vendormap:
-     vname1:        'host_group5_acl'
-     vname2:        'host_group6_acl'
-   by_ip:           'host_group7_acl'
-   by_hostname:     'host_group8_acl'
+     vname1:        'host_group3_acl'
+     vname2:        'host_group4_acl'
+   excluded:
+     - 'host_group5_acl'
+     - 'another.host.example.com'
+   by_ip:           'host_group6_acl'
+   by_hostname:     'host_group7_acl'
 
 Note that the default directory for writing files is not F</var/lib/rancid> so
 you may wish to set this in C<rancid_cvsroot>, (especially if migrating from the old
@@ -192,7 +197,7 @@ email config and creating the repository with C<rancid-cvs>.
 =head2 C<rancid_conf>
 
 The location where the rancid configuration (F<rancid.types.base> and
-F<rancid.types.conf>) is installed. It will be used to check the existance
+F<rancid.types.conf>) is installed. It will be used to check the existence
 of device types before exporting the devices to the rancid configuration. If no match
 is found the device will not be added to rancid.
 
@@ -218,14 +223,6 @@ be different from the default, the default is C<;>.
 =head2 C<default_group>
 
 Put devices into this group if they do not match any other groups defined.
-
-=head2 C<excluded>
-
-This dictionary defines a list of devices that you do not wish to export to
-rancid configuration.
-
-The value should be a L<Netdisco ACL|https://github.com/netdisco/netdisco/wiki/Configuration#access-control-lists>
-to select devices in the Netdisco database.
 
 =head2 C<groups>
 
@@ -257,6 +254,12 @@ a good solution to use the correct device type. Example:
  rancid:
    vendormap:
      cisco-sb:    'group:grp-ciscosb'
+
+=head2 C<excluded>
+
+L<Netdisco
+ACL|https://github.com/netdisco/netdisco/wiki/Configuration#access-control-lists>
+to identify devices that will be excluded from the rancid configuration.
 
 =head2 C<by_ip>
 

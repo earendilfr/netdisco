@@ -39,6 +39,8 @@
             "App::cpanminus" : "1.6108",
             "App::local::lib::helper" : "0.07",
             "Archive::Extract" : "0",
+            "Authen::Radius" : "0",
+            "Authen::TacacsPlus" : "0",
             "CGI::Expand" : "2.05",
             "DBD::Pg" : "0",
             "DBIx::Class" : "0.082841",
@@ -83,7 +85,7 @@
             "Pod::Usage" : "0",
             "Regexp::Common" : "2017060201",
             "Role::Tiny" : "1.002005",
-            "SNMP::Info" : "3.68",
+            "SNMP::Info" : "3.70",
             "SQL::Abstract" : "1.85",
             "SQL::Translator" : "0.11024",
             "Scope::Guard" : "0",
@@ -93,6 +95,7 @@
             "Storable" : "0",
             "Sys::SigAction" : "0",
             "Template" : "2.24",
+            "Template::AutoFilter" : "0",
             "Template::Plugin::CSV" : "0.04",
             "Template::Plugin::Number::Format" : "1.02",
             "Term::ReadLine" : "0",
@@ -121,7 +124,7 @@
    "provides" : {
       "App::Netdisco" : {
          "file" : "lib/App/Netdisco.pm",
-         "version" : "2.042010"
+         "version" : "2.044012"
       },
       "App::Netdisco::AnyEvent::Nbtstat" : {
          "file" : "lib/App/Netdisco/AnyEvent/Nbtstat.pm"
@@ -143,7 +146,7 @@
       },
       "App::Netdisco::DB" : {
          "file" : "lib/App/Netdisco/DB.pm",
-         "version" : "58"
+         "version" : "61"
       },
       "App::Netdisco::DB::ExplicitLocking" : {
          "file" : "lib/App/Netdisco/DB/ExplicitLocking.pm"
@@ -268,6 +271,9 @@
       "App::Netdisco::DB::Result::Virtual::GenericReport" : {
          "file" : "lib/App/Netdisco/DB/Result/Virtual/GenericReport.pm"
       },
+      "App::Netdisco::DB::Result::Virtual::LastNode" : {
+         "file" : "lib/App/Netdisco/DB/Result/Virtual/LastNode.pm"
+      },
       "App::Netdisco::DB::Result::Virtual::NodeIp4" : {
          "file" : "lib/App/Netdisco/DB/Result/Virtual/NodeIp4.pm"
       },
@@ -288,6 +294,9 @@
       },
       "App::Netdisco::DB::Result::Virtual::PollerPerformance" : {
          "file" : "lib/App/Netdisco/DB/Result/Virtual/PollerPerformance.pm"
+      },
+      "App::Netdisco::DB::Result::Virtual::PortMacs" : {
+         "file" : "lib/App/Netdisco/DB/Result/Virtual/PortMacs.pm"
       },
       "App::Netdisco::DB::Result::Virtual::PortUtilization" : {
          "file" : "lib/App/Netdisco/DB/Result/Virtual/PortUtilization.pm"
@@ -405,6 +414,9 @@
       },
       "App::Netdisco::SSHCollector::Platform::PaloAlto" : {
          "file" : "lib/App/Netdisco/SSHCollector/Platform/PaloAlto.pm"
+      },
+      "App::Netdisco::SSHCollector::Platform::VOSS" : {
+         "file" : "lib/App/Netdisco/SSHCollector/Platform/VOSS.pm"
       },
       "App::Netdisco::Transport::SNMP" : {
          "file" : "lib/App/Netdisco/Transport/SNMP.pm"
@@ -688,6 +700,9 @@
       "App::Netdisco::Worker::Plugin::Discover::Neighbors" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Neighbors.pm"
       },
+      "App::Netdisco::Worker::Plugin::Discover::Neighbors::DOCSIS" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Neighbors/DOCSIS.pm"
+      },
       "App::Netdisco::Worker::Plugin::Discover::Neighbors::Routed" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Neighbors/Routed.pm"
       },
@@ -804,7 +819,7 @@
       },
       "homepage" : "http://netdisco.org/",
       "license" : [
-         "http://opensource.org/licenses/BSD-3-Clause"
+         "http://opensource.org/licenses/bsd-license.php"
       ],
       "repository" : {
          "url" : "https://github.com/netdisco/netdisco"
@@ -812,6 +827,6 @@
       "x_IRC" : "irc://irc.freenode.org/#netdisco",
       "x_MailingList" : "https://lists.sourceforge.net/lists/listinfo/netdisco-users"
    },
-   "version" : "2.042010",
+   "version" : "2.044012",
    "x_serialization_backend" : "JSON::PP version 2.97001"
 }

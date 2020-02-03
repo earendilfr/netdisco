@@ -37,6 +37,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "speed",
   { data_type => "text", is_nullable => 1 },
+  "speed_admin",
+  { data_type => "text", is_nullable => 1 },
   "name",
   { data_type => "text", is_nullable => 1 },
   "mac",
@@ -240,6 +242,23 @@ __PACKAGE__->belongs_to( neighbor_alias => 'App::Netdisco::DB::Result::DeviceIp'
       };
   },
   { join_type => 'LEFT' },
+);
+
+=head2 last_node
+
+This relationship will return the last node that was seen on the port.
+
+The JOIN is of type "LEFT" in case there isn't any such node.
+
+=cut
+
+__PACKAGE__->belongs_to(
+    last_node => 'App::Netdisco::DB::Result::Virtual::LastNode', {
+      'foreign.switch' => 'self.ip',
+      'foreign.port'   => 'self.port',
+    }, {
+      join_type => 'LEFT',
+    }
 );
 
 =head2 vlans

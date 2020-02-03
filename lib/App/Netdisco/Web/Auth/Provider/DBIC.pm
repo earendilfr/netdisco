@@ -13,6 +13,8 @@ use Dancer::Plugin::DBIC;
 use Dancer::Plugin::Passphrase;
 use Digest::MD5;
 use Net::LDAP;
+use Authen::Radius;
+use Authen::TacacsPlus;
 use Try::Tiny;
 
 sub authenticate_user {
@@ -103,9 +105,23 @@ sub match_password {
     my $settings = $self->realm_settings;
     my $username_column = $settings->{users_username_column} || 'username';
 
-    return $user->ldap
-      ? $self->match_with_ldap($password, $user->$username_column)
-      : $self->match_with_local_pass($password, $user);
+    my $pwmatch_result = 0;
+    my $username = $user->$username_column;
+
+    if ($user->ldap) {
+      $pwmatch_result = $self->match_with_ldap($password, $username);
+    }
+    elsif ($user->radius) {
+      $pwmatch_result = $self->match_with_radius($password, $username);
+    }
+    elsif ($user->tacacs) {
+      $pwmatch_result = $self->match_with_tacacs($password, $username);
+    }
+    else {
+      $pwmatch_result = $self->match_with_local_pass($password, $user);
+    }
+
+    return $pwmatch_result;
 }
 
 sub match_with_local_pass {
@@ -213,6 +229,50 @@ sub _ldap_search {
     }
 
     return undef;
+}
+
+sub match_with_radius {
+  my($self, $pass, $user) = @_;
+  return unless setting('radius') and ref {} eq ref setting('radius');
+
+  my $conf = setting('radius');
+  my $radius = Authen::Radius->new(Host => $conf->{server}, Secret => $conf->{secret});
+  # my $dict_dir = Path::Class::Dir->new( dist_dir('App-Netdisco') )
+  #   ->subdir('radius_dictionaries')->stringify;
+  Authen::Radius->load_dictionary(); # put $dict_dir in here once it's useful
+
+  $radius->add_attributes(
+     { Name => 'User-Name',         Value => $user },
+     { Name => 'User-Password',     Value => $pass },
+     { Name => 'h323-return-code',  Value => '0' }, # Cisco AV pair
+     { Name => 'Digest-Attributes', Value => { Method => 'REGISTER' } }
+  );
+  $radius->send_packet(ACCESS_REQUEST);
+
+  my $type = $radius->recv_packet();
+  my $radius_return = ($type eq ACCESS_ACCEPT) ? 1 : 0;
+
+  return $radius_return;
+}
+
+sub match_with_tacacs {
+  my($self, $pass, $user) = @_;
+  return unless setting('tacacs') and ref {} eq ref setting('tacacs');
+
+  my $conf = setting('tacacs');
+  my $tacacs = new Authen::TacacsPlus(Host => $conf->{server}, Key => $conf->{key});
+  if (not $tacacs) {
+      debug sprintf('auth error: Authen::TacacsPlus: %s', Authen::TacacsPlus::errmsg());
+      return undef;
+  }
+
+  my $tacacs_return = $tacacs->authen($user,$pass);
+  if (not $tacacs_return) {
+      debug sprintf('error: Authen::TacacsPlus: %s', Authen::TacacsPlus::errmsg());
+  }
+  $tacacs->close();
+
+  return $tacacs_return;
 }
 
 1;

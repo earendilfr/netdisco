@@ -35,7 +35,7 @@
                   name="aps"[% ' checked="checked"' IF params.aps %]/>
               </label>
               <label class="nd_checkboxlabel" for="aps">
-                <span class="nd_searchcheckbox uneditable-input"><i class="icon-li icon-signal"></i>&nbsp Wireless APs</span>
+                <span class="nd_searchcheckbox uneditable-input"><i class="icon-li icon-signal"></i>&nbsp; Wireless APs</span>
               </label>
             </div>
             <div class="clearfix"><p></p></div>
@@ -48,5 +48,5 @@
                 <span class="nd_searchcheckbox uneditable-input">Match All Options</span>
               </label>
             </div>
-            <button id="[% tab.tag %]_submit" type="submit" class="btn btn-info">
+            <button id="[% tab.tag | html_entity %]_submit" type="submit" class="btn btn-info">
               <i class="icon-search icon-large pull-left nd_navbar-icon"></i> Search Nodes</button>
