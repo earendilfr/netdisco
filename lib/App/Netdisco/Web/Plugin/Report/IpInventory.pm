@@ -6,12 +6,39 @@ use Dancer::Plugin::Auth::Extensible;
 
 use App::Netdisco::Web::Plugin;
 use NetAddr::IP::Lite ':lower';
+use POSIX qw/strftime/;
 
 register_report(
     {   category     => 'IP',
         tag          => 'ipinventory',
         label        => 'IP Inventory',
         provides_csv => 1,
+        api_endpoint => 1,
+        api_parameters => [
+          subnet => {
+            description => 'IP Prefix to search',
+            required => 1,
+          },
+          daterange => {
+            description => 'Date range to search',
+            default => ('1970-01-01 to '. strftime('%Y-%m-%d', gmtime)),
+          },
+          age_invert => {
+            description => 'Results should NOT be within daterange',
+            type => 'boolean',
+            default => 'false',
+          },
+          limit => {
+            description => 'Maximum number of historical records',
+            enum => [qw/32 64 128 256 512 1024 2048 4096 8192/],
+            default => '256',
+          },
+          never => {
+            description => 'Include in the report IPs never seen',
+            type => 'boolean',
+            default => 'false',
+          },
+        ],
     }
 );
 
@@ -25,7 +52,10 @@ get '/ajax/content/report/ipinventory' => require_login sub {
       if (! $subnet) or ($subnet->addr eq '0.0.0.0');
 
     my $agenot = param('age_invert') || '0';
-    my ( $start, $end ) = param('daterange') =~ /(\d+-\d+-\d+)/gmx;
+
+    my $daterange = param('daterange')
+      || ('1970-01-01 to '. strftime('%Y-%m-%d', gmtime));
+    my ( $start, $end ) = $daterange =~ /(\d+-\d+-\d+)/gmx;
 
     my $limit = param('limit') || 256;
     my $never = param('never') || '0';
@@ -47,31 +77,37 @@ get '/ajax/content/report/ipinventory' => require_login sub {
                 'dns',
                 \'true AS active',
                 \'false AS node',
-                \qq/replace( date_trunc( 'minute', age( now(), device.last_discover ) ) ::text, 'mon', 'month') AS age/
+                \qq/replace( date_trunc( 'minute', age( now(), device.last_discover ) ) ::text, 'mon', 'month') AS age/,
+                'device.vendor',
+
             ],
-            as => [qw( ip mac time_first time_last dns active node age)],
+            as => [qw( ip mac time_first time_last dns active node age vendor)],
         }
     )->hri;
 
     my $rs2 = schema('netdisco')->resultset('NodeIp')->search(
         undef,
-        {   columns   => [qw( ip mac time_first time_last dns active)],
+        {   join   => ['oui'],
+            columns   => [qw( ip mac time_first time_last dns active)],
             '+select' => [ \'true AS node',
-                           \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/
+                           \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/,
+                           \'oui.company || oui.abbrev'
                          ],
-            '+as'     => [ 'node', 'age' ],
+            '+as'     => [ 'node', 'age', 'vendor' ],
         }
     )->hri;
 
     my $rs3 = schema('netdisco')->resultset('NodeNbt')->search(
         undef,
-        {   columns   => [qw( ip mac time_first time_last )],
+        {   join   => ['oui'], 
+            columns   => [qw( ip mac time_first time_last )],
             '+select' => [
                 'nbname AS dns', 'active',
                 \'true AS node',
-                \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/ 
+                \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/,
+                'oui.company'
             ],
-            '+as' => [ 'dns', 'active', 'node', 'age' ],
+            '+as' => [ 'dns', 'active', 'node', 'age', 'vendor' ],
         }
     )->hri;
 
@@ -85,9 +121,10 @@ get '/ajax/content/report/ipinventory' => require_login sub {
             {   bind => [ $subnet->cidr ],
                 columns   => [qw( ip mac time_first time_last dns active)],
                 '+select' => [ \'false AS node',
-                               \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/
+                               \qq/replace( date_trunc( 'minute', age( now(), time_last ) ) ::text, 'mon', 'month') AS age/,
+                               \'null as vendor' 
                              ],
-                '+as'     => [ 'node', 'age' ],
+                '+as'     => [ 'node', 'age', 'vendor' ],
             }
         )->hri;
 
@@ -104,11 +141,12 @@ get '/ajax/content/report/ipinventory' => require_login sub {
                 \qq/date_trunc('second', time_first) AS time_first/,
                 'active',
                 'node',
-                'age'
+                'age',
+                'vendor'
             ],
             as => [
                 'ip',     'mac',  'dns',  'time_last', 'time_first',
-                'active', 'node', 'age'
+                'active', 'node', 'age', 'vendor'
             ],
             order_by => [{-asc => 'ip'}, {-desc => 'active'}, {-asc => 'node'}],
         }
@@ -155,13 +193,11 @@ get '/ajax/content/report/ipinventory' => require_login sub {
 
     if ( request->is_ajax ) {
         my $json = to_json( \@results );
-        template 'ajax/report/ipinventory.tt', { results => $json },
-            { layout => undef };
+        template 'ajax/report/ipinventory.tt', { results => $json };
     }
     else {
         header( 'Content-Type' => 'text/comma-separated-values' );
-        template 'ajax/report/ipinventory_csv.tt', { results => \@results, },
-            { layout => undef };
+        template 'ajax/report/ipinventory_csv.tt', { results => \@results, };
     }
 };
 

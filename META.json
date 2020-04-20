@@ -4,7 +4,7 @@
       "Oliver Gorwits <oliver@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4224",
+   "generated_by" : "Module::Build version 0.4231",
    "license" : [
       "bsd"
    ],
@@ -64,7 +64,7 @@
             "JSON::XS" : "3.01",
             "List::MoreUtils" : "0.428",
             "List::Util" : "1.49",
-            "MCE" : "1.703",
+            "MCE" : "1.866",
             "MIME::Base64" : "3.13",
             "Module::Load" : "0.32",
             "Moo" : "1.001000",
@@ -102,6 +102,7 @@
             "Term::UI" : "0",
             "Try::Tiny" : "0",
             "URI" : "0",
+            "URI::Based" : "0",
             "URL::Encode" : "0.03",
             "URL::Encode::XS" : "0",
             "YAML" : "0.84",
@@ -124,7 +125,7 @@
    "provides" : {
       "App::Netdisco" : {
          "file" : "lib/App/Netdisco.pm",
-         "version" : "2.044012"
+         "version" : "2.045002"
       },
       "App::Netdisco::AnyEvent::Nbtstat" : {
          "file" : "lib/App/Netdisco/AnyEvent/Nbtstat.pm"
@@ -146,10 +147,13 @@
       },
       "App::Netdisco::DB" : {
          "file" : "lib/App/Netdisco/DB.pm",
-         "version" : "61"
+         "version" : "62"
       },
       "App::Netdisco::DB::ExplicitLocking" : {
          "file" : "lib/App/Netdisco/DB/ExplicitLocking.pm"
+      },
+      "App::Netdisco::DB::Result" : {
+         "file" : "lib/App/Netdisco/DB/Result.pm"
       },
       "App::Netdisco::DB::Result::Admin" : {
          "file" : "lib/App/Netdisco/DB/Result/Admin.pm"
@@ -394,6 +398,9 @@
       "App::Netdisco::SSHCollector::Platform::CPVSX" : {
          "file" : "lib/App/Netdisco/SSHCollector/Platform/CPVSX.pm"
       },
+      "App::Netdisco::SSHCollector::Platform::Clavister" : {
+         "file" : "lib/App/Netdisco/SSHCollector/Platform/Clavister.pm"
+      },
       "App::Netdisco::SSHCollector::Platform::FreeBSD" : {
          "file" : "lib/App/Netdisco/SSHCollector/Platform/FreeBSD.pm"
       },
@@ -477,6 +484,9 @@
       },
       "App::Netdisco::Web" : {
          "file" : "lib/App/Netdisco/Web.pm"
+      },
+      "App::Netdisco::Web::API::Objects" : {
+         "file" : "lib/App/Netdisco/Web/API/Objects.pm"
       },
       "App::Netdisco::Web::AdminTask" : {
          "file" : "lib/App/Netdisco/Web/AdminTask.pm"
@@ -736,6 +746,9 @@
       "App::Netdisco::Worker::Plugin::ExpireNodes" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/ExpireNodes.pm"
       },
+      "App::Netdisco::Worker::Plugin::GetAPIKey" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/GetAPIKey.pm"
+      },
       "App::Netdisco::Worker::Plugin::Graph" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Graph.pm"
       },
@@ -784,9 +797,6 @@
       "App::Netdisco::Worker::Plugin::Renumber" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Renumber.pm"
       },
-      "App::Netdisco::Worker::Plugin::SetUserToken" : {
-         "file" : "lib/App/Netdisco/Worker/Plugin/SetUserToken.pm"
-      },
       "App::Netdisco::Worker::Plugin::Show" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Show.pm"
       },
@@ -827,6 +837,6 @@
       "x_IRC" : "irc://irc.freenode.org/#netdisco",
       "x_MailingList" : "https://lists.sourceforge.net/lists/listinfo/netdisco-users"
    },
-   "version" : "2.044012",
-   "x_serialization_backend" : "JSON::PP version 2.97001"
+   "version" : "2.045002",
+   "x_serialization_backend" : "JSON::PP version 4.02"
 }

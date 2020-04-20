@@ -1,3 +1,49 @@
+2.045002 - 2020-04-19
+
+  [ENHANCEMENTS]
+
+  * allow API to work with non-root hosting (where path is not '/')
+
+  [BUG FIXES]
+
+  * rename ports column in device table to be num_ports
+
+2.045001 - 2020-04-18
+
+  [BUG FIXES]
+
+  * restore ports column in device table to fix discover bug
+
+2.045000 - 2020-04-15
+
+  [NEW FEATURES]
+
+  * API for search, objects, and reports: https://github.com/netdisco/netdisco/wiki/API
+
+  [ENHANCEMENTS]
+
+  * #442 add device ip, port and vlan to the node vendor report results
+  * #674 added support for Clavister SSH collection (Henningen)
+  * #707 change SSHCollector::NXOS to use expect (rc9000)
+
+2.044015 - 2020-02-12
+
+  [BUG FIXES]
+
+  * default access list for device_auth should be ipv4 and ipv6
+
+2.044014 - 2020-02-09
+
+  [BUG FIXES]
+
+  * change from MCE::Shared to MCE::Queue after resolution of crash bug
+
+2.044013 - 2020-02-04
+
+  [BUG FIXES]
+
+  * change from MCE::Queue to MCE::Shared to better handle signals
+
 2.044012 - 2020-02-01
 
   [ENHANCEMENTS]

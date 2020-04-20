@@ -7,19 +7,56 @@ use Dancer::Plugin::DBIC;
 use Dancer::Plugin::Auth::Extensible;
 use Dancer::Plugin::Swagger;
 
+use Dancer::Error;
+use Dancer::Continuation::Route::ErrorSent;
+
 use URI ();
 use Socket6 (); # to ensure dependency is met
 use HTML::Entities (); # to ensure dependency is met
 use URI::QueryParam (); # part of URI, to add helper methods
 use Path::Class 'dir';
 use Module::Load ();
-use App::Netdisco::Util::Web 'interval_to_daterange';
+use App::Netdisco::Util::Web qw/
+  interval_to_daterange
+  request_is_api
+  request_is_api_report
+  request_is_api_search
+/;
+
+BEGIN {
+  # https://github.com/PerlDancer/Dancer/issues/967
+  no warnings 'redefine';
+  *Dancer::_redirect = sub {
+      my ($destination, $status) = @_;
+      my $response = Dancer::SharedData->response;
+      $response->status($status || 302);
+      $response->headers('Location' => $destination);
+  };
+
+  # neater than using Dancer::Plugin::Res to handle JSON differently
+  *Dancer::send_error = sub {
+      my ($body, $status) = @_;
+      if (request_is_api) {
+        status $status || 400;
+        $body = '' unless defined $body;
+        Dancer::Continuation::Route::ErrorSent->new(
+            return_value => to_json { error => $body, return_url => param('return_url') }
+        )->throw;
+      }
+      Dancer::Continuation::Route::ErrorSent->new(
+          return_value => Dancer::Error->new(
+              message => $body,
+              code => $status || 500)->render()
+      )->throw;
+  };
+}
 
 use App::Netdisco::Web::AuthN;
 use App::Netdisco::Web::Static;
 use App::Netdisco::Web::Search;
 use App::Netdisco::Web::Device;
 use App::Netdisco::Web::Report;
+use App::Netdisco::Web::API::Objects;
 use App::Netdisco::Web::AdminTask;
 use App::Netdisco::Web::TypeAhead;
 use App::Netdisco::Web::PortControl;
@@ -75,28 +112,6 @@ eval {
   setting('session_cookie_key' => $skey->get_column('a_session')) if $skey;
 };
 Dancer::Session::Cookie::init(session);
-
-# setup for swagger API
-my $swagger = Dancer::Plugin::Swagger->instance->doc;
-$swagger->{schemes} = ['http','https'];
-$swagger->{consumes} = 'application/json';
-$swagger->{produces} = 'application/json';
-$swagger->{tags} = [
-  {name => 'Global'},
-  {name => 'Devices',
-    description => 'Operations relating to Devices (switches, routers, etc)'},
-  {name => 'Nodes',
-    description => 'Operations relating to Nodes (end-stations such as printers)'},
-  {name => 'NodeIPs',
-    description => 'Operations relating to MAC-IP mappings (IPv4 ARP and IPv6 Neighbors)'},
-];
-$swagger->{securityDefinitions} = {
-  APIKeyHeader =>
-    { type => 'apiKey', name => 'Authorization', in => 'header' },
-  BasicAuth =>
-    { type => 'basic'  },
-};
-$swagger->{security} = [ { APIKeyHeader => [] } ];
 
 # workaround for https://github.com/PerlDancer/Dancer/issues/935
 hook after_error_render => sub { setting('layout' => 'main') };
@@ -229,14 +244,75 @@ hook 'after_template_render' => sub {
     # debug $template_engine->{config}->{AUTO_FILTER};
 };
 
+# support for report api which is basic table result in json
+hook before_layout_render => sub {
+  my ($tokens, $html_ref) = @_;
+  return unless request_is_api_report or request_is_api_search;
+
+  ${ $html_ref } =
+    $tokens->{results} ? (to_json $tokens->{results}) : {};
+};
+
 # workaround for Swagger plugin weird response body
 hook 'after' => sub {
     my $r = shift; # a Dancer::Response
 
-    if (request->path eq '/swagger.json') {
+    if (request->path eq uri_for('/swagger.json')->path) {
         $r->content( to_json( $r->content ) );
         header('Content-Type' => 'application/json');
     }
+
+    # instead of setting serialiser
+    # and also to handle some plugins just returning undef if search fails
+    if (request_is_api) {
+        header('Content-Type' => 'application/json');
+        $r->content( $r->content || '[]' );
+    }
+};
+
+# setup for swagger API
+my $swagger = Dancer::Plugin::Swagger->instance;
+my $swagger_doc = $swagger->doc;
+
+$swagger_doc->{schemes} = ['http','https'];
+$swagger_doc->{consumes} = 'application/json';
+$swagger_doc->{produces} = 'application/json';
+$swagger_doc->{tags} = [
+  {name => 'General',
+    description => 'Log in and Log out'},
+  {name => 'Search',
+    description => 'Search Operations'},
+  {name => 'Objects',
+    description => 'Retrieve Device, Port, and associated Node Data'},
+  {name => 'Reports',
+    description => 'Canned and Custom Reports'},
+];
+$swagger_doc->{securityDefinitions} = {
+  APIKeyHeader =>
+    { type => 'apiKey', name => 'Authorization', in => 'header' },
+  BasicAuth =>
+    { type => 'basic'  },
+};
+$swagger_doc->{security} = [ { APIKeyHeader => [] } ];
+
+# manually install Swagger UI routes because plugin doesn't handle non-root
+# hosting, so we cannot use show_ui(1)
+my $swagger_base = config->{plugins}->{Swagger}->{ui_url};
+
+get $swagger_base => sub {
+    redirect uri_for($swagger_base)->path
+      . '/?url=' . uri_for('/swagger.json')->path;
+};
+
+get $swagger_base.'/' => sub {
+    # user might request /swagger-ui/ initially (Plugin doesn't handle this)
+    params->{url} or redirect uri_for($swagger_base)->path;
+    send_file( 'swagger-ui/index.html' );
+};
+
+# omg the plugin uses system_path and we don't want to go there
+get $swagger_base.'/**' => sub {
+    send_file( join '/', 'swagger-ui', @{ (splat())[0] } );
 };
 
 # remove empty lines from CSV response
@@ -261,16 +337,5 @@ any qr{.*} => sub {
     status 'not_found';
     template 'index';
 };
-
-{
-  # https://github.com/PerlDancer/Dancer/issues/967
-  no warnings 'redefine';
-  *Dancer::_redirect = sub {
-      my ($destination, $status) = @_;
-      my $response = Dancer::SharedData->response;
-      $response->status($status || 302);
-      $response->headers('Location' => $destination);
-  };
-}
 
 true;
