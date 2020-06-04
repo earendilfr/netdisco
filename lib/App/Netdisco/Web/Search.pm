@@ -1,7 +1,6 @@
 package App::Netdisco::Web::Search;
 
 use Dancer ':syntax';
-use Dancer::Plugin::Ajax;
 use Dancer::Plugin::DBIC;
 use Dancer::Plugin::Auth::Extensible;
 
@@ -33,7 +32,7 @@ get '/search' => require_login sub {
         }
 
         # pick most likely tab for initial results
-        if ($q =~ m/^\d+$/) {
+        if ($q =~ m/^[0-9]+$/ and $q < 4096) {
             params->{'tab'} = 'vlan';
         }
         else {
