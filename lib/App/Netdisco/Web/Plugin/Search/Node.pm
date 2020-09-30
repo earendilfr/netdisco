@@ -7,6 +7,7 @@ use Dancer::Plugin::Auth::Extensible;
 use NetAddr::IP::Lite ':lower';
 use Regexp::Common 'net';
 use NetAddr::MAC ();
+use POSIX qw/strftime/;
 
 use App::Netdisco::Web::Plugin;
 use App::Netdisco::Util::Web 'sql_match';
@@ -42,6 +43,7 @@ register_search_tab({
       },
       daterange => {
         description => 'Date Range in format "YYYY-MM-DD to YYYY-MM-DD"',
+        default => ('1970-01-01 to '. strftime('%Y-%m-%d', gmtime)),
       },
       age_invert => {
         description => 'Results should NOT be within daterange',
@@ -61,6 +63,7 @@ register_search_tab({
 get '/ajax/content/search/node' => require_login sub {
     my $node = param('q');
     send_error('Missing node', 400) unless $node;
+    return unless ($node =~ m/\w/); # need some alphanum at least
     content_type('text/html');
 
     my $agenot = param('age_invert') || '0';

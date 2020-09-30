@@ -7,10 +7,48 @@ use warnings;
 use Try::Tiny;
 use Regexp::Common 'net';
 use NetAddr::IP::Lite ':lower';
+use NetAddr::MAC ();
 
 require Dancer::Logger;
 
 =head1 ADDITIONAL METHODS
+
+=head2 device_ips_with_address_or_name( $address_or_name )
+
+Returns a correlated subquery for the set of C<device_ip> entries for each
+device. The IP alias or dns matches the supplied C<address_or_name>, using
+C<ILIKE>.
+
+=cut
+
+sub device_ips_with_address_or_name {
+  my ($rs, $q, $ipbind) = @_;
+  $q ||= '255.255.255.255/32';
+
+  return $rs->search(undef,{
+    # NOTE: bind param list order is significant
+    join => ['device_ips_by_address_or_name'],
+    bind => [$q, $ipbind, $q],
+  });
+}
+
+=head2 ports_with_mac( $mac )
+
+Returns a correlated subquery for the set of C<device_port> entries for each
+device. The port MAC address matches the supplied C<mac>, using C<ILIKE>.
+
+=cut
+
+sub ports_with_mac {
+  my ($rs, $mac) = @_;
+  $mac ||= '00:00:00:00:00:00';
+
+  return $rs->search(undef,{
+    # NOTE: bind param list order is significant
+    join => ['ports_by_mac'],
+    bind => [$mac],
+  });
+}
 
 =head2 with_times
 
@@ -181,6 +219,10 @@ Can match the C<location> field as a substring.
 Can match the C<description> field as a substring (usually this field contains
 a description of the vendor operating system).
 
+=item mac
+
+Will match exactly the C<mac> field of the Device or any of its Interfaces.
+
 =item model
 
 Will match exactly the C<model> field.
@@ -245,6 +287,13 @@ sub search_by_field {
         \[ 'substring(me.layers,9-?, 1)::int = 1', $layers ];
     }
 
+    # get IEEE MAC format
+    my $mac = NetAddr::MAC->new($p->{mac});
+    undef $mac if
+      ($mac and $mac->as_ieee
+      and (($mac->as_ieee eq '00:00:00:00:00:00')
+        or ($mac->as_ieee !~ m/$RE{net}{MAC}/)));
+
     return $rs
       ->search_rs({}, $attrs)
       ->search({
@@ -255,6 +304,12 @@ sub search_by_field {
             { '-ilike' => "\%$p->{location}\%" }) : ()),
           ($p->{description} ? ('me.description' =>
             { '-ilike' => "\%$p->{description}\%" }) : ()),
+
+          ($mac ? (
+            -or => [
+              'me.mac' => $mac->as_ieee,
+              'ports.mac' => $mac->as_ieee,
+            ]) : ()),
 
           ($p->{model} ? ('me.model' =>
             { '-in' => $p->{model} }) : ()),
@@ -283,7 +338,7 @@ sub search_by_field {
       {
         order_by => [qw/ me.dns me.ip /],
         (($p->{dns} or $p->{ip}) ? (
-          join => 'device_ips',
+          join => [qw/device_ips ports/],
           distinct => 1,
         ) : ()),
       }
@@ -309,6 +364,8 @@ The following fields are inspected for a match:
 
 =item name
 
+=item mac (including port addresses)
+
 =item description
 
 =item dns
@@ -330,18 +387,30 @@ sub search_fuzzy {
     # basic IP check is a string match
     my $ip_clause = [
         'me.ip::text'  => { '-ilike' => $q },
-        'device_ips.alias::text' => { '-ilike' => $q },
+        'device_ips_by_address_or_name.alias::text' => { '-ilike' => $q },
     ];
+    my $ipbind = '255.255.255.255/32';
 
     # but also allow prefix search
     if (my $ip = NetAddr::IP::Lite->new($qc)) {
         $ip_clause = [
             'me.ip'  => { '<<=' => $ip->cidr },
-            'device_ips.alias' => { '<<=' => $ip->cidr },
+            'device_ips_by_address_or_name.alias' => { '<<=' => $ip->cidr },
         ];
+        $ipbind = $ip->cidr;
     }
 
-    return $rs->search(
+    # get IEEE MAC format
+    my $mac = NetAddr::MAC->new($q);
+    undef $mac if
+      ($mac and $mac->as_ieee
+      and (($mac->as_ieee eq '00:00:00:00:00:00')
+        or ($mac->as_ieee !~ m/$RE{net}{MAC}/)));
+    $mac = ($mac ? $mac->as_ieee : $q);
+
+    return $rs->ports_with_mac($mac)
+              ->device_ips_with_address_or_name($q, $ipbind)
+              ->search(
       {
         -or => [
           'me.contact'  => { '-ilike' => $q },
@@ -354,15 +423,18 @@ sub search_fuzzy {
                         { join => 'modules', columns => 'ip' })->as_query()
           },
           -or => [
+            'me.mac::text' => { '-ilike' => $mac},
+            'ports_by_mac.mac::text' => { '-ilike' => $mac},
+          ],
+          -or => [
             'me.dns'      => { '-ilike' => $q },
-            'device_ips.dns' => { '-ilike' => $q },
+            'device_ips_by_address_or_name.dns' => { '-ilike' => $q },
           ],
           -or => $ip_clause,
         ],
       },
       {
         order_by => [qw/ me.dns me.ip /],
-        join => 'device_ips',
         distinct => 1,
       }
     );
