@@ -4,7 +4,7 @@
       "Oliver Gorwits <oliver@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4231",
+   "generated_by" : "Module::Build version 0.4224",
    "license" : [
       "bsd"
    ],
@@ -42,6 +42,7 @@
             "Authen::Radius" : "0",
             "Authen::TacacsPlus" : "0",
             "CGI::Expand" : "2.05",
+            "Command::Runner" : "0",
             "DBD::Pg" : "0",
             "DBIx::Class" : "0.082841",
             "DBIx::Class::Helpers" : "2.033004",
@@ -127,7 +128,7 @@
    "provides" : {
       "App::Netdisco" : {
          "file" : "lib/App/Netdisco.pm",
-         "version" : "2.046002"
+         "version" : "2.047002"
       },
       "App::Netdisco::AnyEvent::Nbtstat" : {
          "file" : "lib/App/Netdisco/AnyEvent/Nbtstat.pm"
@@ -149,7 +150,7 @@
       },
       "App::Netdisco::DB" : {
          "file" : "lib/App/Netdisco/DB.pm",
-         "version" : "63"
+         "version" : "64"
       },
       "App::Netdisco::DB::ExplicitLocking" : {
          "file" : "lib/App/Netdisco/DB/ExplicitLocking.pm"
@@ -484,6 +485,9 @@
       "App::Netdisco::Util::Web" : {
          "file" : "lib/App/Netdisco/Util/Web.pm"
       },
+      "App::Netdisco::Util::Worker" : {
+         "file" : "lib/App/Netdisco/Util/Worker.pm"
+      },
       "App::Netdisco::Web" : {
          "file" : "lib/App/Netdisco/Web.pm"
       },
@@ -685,6 +689,9 @@
       "App::Netdisco::Worker::Plugin::Arpnip" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Arpnip.pm"
       },
+      "App::Netdisco::Worker::Plugin::Arpnip::Hooks" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Arpnip/Hooks.pm"
+      },
       "App::Netdisco::Worker::Plugin::Arpnip::Nodes" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Arpnip/Nodes.pm"
       },
@@ -708,6 +715,9 @@
       },
       "App::Netdisco::Worker::Plugin::Discover::Entities" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Entities.pm"
+      },
+      "App::Netdisco::Worker::Plugin::Discover::Hooks" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Hooks.pm"
       },
       "App::Netdisco::Worker::Plugin::Discover::Neighbors" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Discover/Neighbors.pm"
@@ -754,11 +764,23 @@
       "App::Netdisco::Worker::Plugin::Graph" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Graph.pm"
       },
+      "App::Netdisco::Worker::Plugin::Hook" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Hook.pm"
+      },
+      "App::Netdisco::Worker::Plugin::Hook::Exec" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Hook/Exec.pm"
+      },
+      "App::Netdisco::Worker::Plugin::Hook::HTTP" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Hook/HTTP.pm"
+      },
       "App::Netdisco::Worker::Plugin::Location" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Location.pm"
       },
       "App::Netdisco::Worker::Plugin::Macsuck" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Macsuck.pm"
+      },
+      "App::Netdisco::Worker::Plugin::Macsuck::Hooks" : {
+         "file" : "lib/App/Netdisco/Worker/Plugin/Macsuck/Hooks.pm"
       },
       "App::Netdisco::Worker::Plugin::Macsuck::Nodes" : {
          "file" : "lib/App/Netdisco/Worker/Plugin/Macsuck/Nodes.pm"
@@ -831,7 +853,7 @@
       },
       "homepage" : "http://netdisco.org/",
       "license" : [
-         "http://opensource.org/licenses/bsd-license.php"
+         "http://opensource.org/licenses/BSD-3-Clause"
       ],
       "repository" : {
          "url" : "https://github.com/netdisco/netdisco"
@@ -839,6 +861,6 @@
       "x_IRC" : "irc://irc.freenode.org/#netdisco",
       "x_MailingList" : "https://lists.sourceforge.net/lists/listinfo/netdisco-users"
    },
-   "version" : "2.046002",
-   "x_serialization_backend" : "JSON::PP version 4.02"
+   "version" : "2.047002",
+   "x_serialization_backend" : "JSON::PP version 2.97001"
 }

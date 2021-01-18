@@ -132,6 +132,7 @@ lib/App/Netdisco/Util/PortMAC.pm
 lib/App/Netdisco/Util/SNMP.pm
 lib/App/Netdisco/Util/Statistics.pm
 lib/App/Netdisco/Util/Web.pm
+lib/App/Netdisco/Util/Worker.pm
 lib/App/Netdisco/Web.pm
 lib/App/Netdisco/Web/AdminTask.pm
 lib/App/Netdisco/Web/API/Objects.pm
@@ -199,6 +200,7 @@ lib/App/Netdisco/Web/TypeAhead.pm
 lib/App/Netdisco/Worker/Loader.pm
 lib/App/Netdisco/Worker/Plugin.pm
 lib/App/Netdisco/Worker/Plugin/Arpnip.pm
+lib/App/Netdisco/Worker/Plugin/Arpnip/Hooks.pm
 lib/App/Netdisco/Worker/Plugin/Arpnip/Nodes.pm
 lib/App/Netdisco/Worker/Plugin/Arpnip/Subnets.pm
 lib/App/Netdisco/Worker/Plugin/Arpwalk.pm
@@ -207,6 +209,7 @@ lib/App/Netdisco/Worker/Plugin/Delete.pm
 lib/App/Netdisco/Worker/Plugin/Discover.pm
 lib/App/Netdisco/Worker/Plugin/Discover/CanonicalIP.pm
 lib/App/Netdisco/Worker/Plugin/Discover/Entities.pm
+lib/App/Netdisco/Worker/Plugin/Discover/Hooks.pm
 lib/App/Netdisco/Worker/Plugin/Discover/Neighbors.pm
 lib/App/Netdisco/Worker/Plugin/Discover/Neighbors/DOCSIS.pm
 lib/App/Netdisco/Worker/Plugin/Discover/Neighbors/Routed.pm
@@ -222,8 +225,12 @@ lib/App/Netdisco/Worker/Plugin/Expire.pm
 lib/App/Netdisco/Worker/Plugin/ExpireNodes.pm
 lib/App/Netdisco/Worker/Plugin/GetAPIKey.pm
 lib/App/Netdisco/Worker/Plugin/Graph.pm
+lib/App/Netdisco/Worker/Plugin/Hook.pm
+lib/App/Netdisco/Worker/Plugin/Hook/Exec.pm
+lib/App/Netdisco/Worker/Plugin/Hook/HTTP.pm
 lib/App/Netdisco/Worker/Plugin/Location.pm
 lib/App/Netdisco/Worker/Plugin/Macsuck.pm
+lib/App/Netdisco/Worker/Plugin/Macsuck/Hooks.pm
 lib/App/Netdisco/Worker/Plugin/Macsuck/Nodes.pm
 lib/App/Netdisco/Worker/Plugin/Macsuck/WirelessNodes.pm
 lib/App/Netdisco/Worker/Plugin/Macwalk.pm
@@ -401,6 +408,7 @@ share/schema_versions/App-Netdisco-DB-6-7-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-60-61-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-61-62-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-62-63-PostgreSQL.sql
+share/schema_versions/App-Netdisco-DB-63-64-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-7-8-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-8-9-PostgreSQL.sql
 share/schema_versions/App-Netdisco-DB-9-10-PostgreSQL.sql

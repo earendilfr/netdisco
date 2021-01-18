@@ -270,6 +270,8 @@ sub jq_complete {
           log    => $job->log,
           started  => $job->started,
           finished => $job->finished,
+          (($job->action eq 'hook') ? (subaction => $job->subaction) : ()),
+          ($job->only_namespace ? (action => ($job->action .'::'. $job->only_namespace)) : ()),
         });
     });
     $happy = true;
@@ -284,6 +286,7 @@ sub jq_complete {
 
 sub jq_log {
   return schema('netdisco')->resultset('Admin')->search({
+    'me.action' => { '-not_like' => 'hook::%' },
     -or => [
       { 'me.log' => undef },
       { 'me.log' => { '-not_like' => 'duplicate of %' } },
