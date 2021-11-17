@@ -61,7 +61,7 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
   $device->set_column( last_discover => \'now()' );
 
   # protection for failed SNMP gather
-  if ($device->in_storage) {
+  if ($device->in_storage and not $device->is_pseudo) {
       my $ip = $device->ip;
       my $protect = setting('snmp_field_protection')->{'device'} || {};
       my %dirty = $device->get_dirty_columns;
@@ -199,7 +199,7 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
   my $agg_ports      = $snmp->agg_ports;
 
   # clear the cached uptime and get a new one
-  my $dev_uptime = $snmp->load_uptime;
+  my $dev_uptime = ($device->is_pseudo ? $snmp->uptime : $snmp->load_uptime);
   if (!defined $dev_uptime) {
       error sprintf ' [%s] interfaces - Error! Failed to get uptime from device!',
         $device->ip;
@@ -239,8 +239,15 @@ register_worker({ phase => 'early', driver => 'snmp' }, sub {
       }
 
       if (exists $i_ignore->{$entry}) {
-          debug sprintf ' [%s] interfaces - ignoring %s (%s) (%s)',
+          debug sprintf ' [%s] interfaces - ignoring %s (%s) (%s) (SNMP::Info::i_ignore)',
             $device->ip, $entry, $port, ($i_type->{$entry} || '');
+          next;
+      }
+
+      # Skip interfaces by type filter
+      if (defined $i_type->{$entry} and (scalar grep {$i_type->{$entry} =~ m/^$_$/} @{setting('ignore_interface_types') || []})) {
+          debug sprintf ' [%s] interfaces - ignoring %s (%s) (%s) (config:ignore_interface_types)',
+            $device->ip, $entry, $port, $i_type->{$entry};
           next;
       }
 

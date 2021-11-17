@@ -124,7 +124,7 @@ sub search_aliases {
 
     # rough approximation of IP addresses (v4 in v6 not supported).
     # this helps us avoid triggering any DNS.
-    my $by_ip = ($q =~ m{^(?:$RE{net}{IPv4}|$RE{net}{IPv6})$}i) ? 1 : 0;
+    my $by_ip = ($q =~ m{^(?:$RE{net}{IPv4}|$RE{net}{IPv6})(?:/\d+)?$}i) ? 1 : 0;
 
     my $clause;
     if ($by_ip) {
@@ -394,7 +394,9 @@ sub search_fuzzy {
     my $ipbind = '255.255.255.255/32';
 
     # but also allow prefix search
-    if (my $ip = NetAddr::IP::Lite->new($qc)) {
+    if ($qc =~ m{^(?:$RE{net}{IPv4}|$RE{net}{IPv6})(?:/\d+)?$}i
+        and my $ip = NetAddr::IP::Lite->new($qc)) {
+
         $ip_clause = [
             'me.ip'  => { '<<=' => $ip->cidr },
             'device_ips_by_address_or_name.alias' => { '<<=' => $ip->cidr },
@@ -702,11 +704,13 @@ sub delete {
   $ip ||= 'netdisco';
 
   foreach my $set (qw/
-    DeviceIp
-    DeviceVlan
-    DevicePower
-    DeviceModule
     Community
+    DeviceBrowser
+    DeviceIp
+    DeviceModule
+    DevicePower
+    DeviceSnapshot
+    DeviceVlan
   /) {
       my $gone = $schema->resultset($set)->search(
         { ip => { '-in' => $devices->as_query } },
@@ -716,14 +720,14 @@ sub delete {
         $ip, $gone, _plural($gone), $set ) ) if defined Dancer::Logger::logger();
   }
 
-  foreach my $set (qw/
-    Admin
-    DeviceSkip
-  /) {
-      $schema->resultset($set)->search(
-        { device => { '-in' => $devices->as_query } },
-      )->delete;
-  }
+  $schema->resultset('Admin')->search({
+    device => { '-in' => $devices->as_query },
+    status => { '-not_like' => 'queued-%' },
+  })->delete;
+
+  $schema->resultset('DeviceSkip')->search(
+    { device => { '-in' => $devices->as_query } },
+  )->delete;
 
   my $gone = $schema->resultset('Topology')->search({
     -or => [
@@ -744,3 +748,35 @@ sub delete {
 }
 
 1;
+
+__END__
+list of tables in the db that use the device:
+
+# use 'ip' as PK
+community
+device_browser
+device_ip
+device_module
+device_power
+device_snapshot
+device_vlan
+
+# use 'device' as PK
+admin
+device_skip
+topology
+
+# special to let nodes be kept
+device_port
+
+# defer to port resultset class
+device_port_power
+device_port_properties
+device_port_ssid
+device_port_vlan
+device_port_wireless
+device_port_log
+
+# dbic does this one itself
+device
+
